@@ -101,8 +101,10 @@
     <br>
 
     <!-- sign in sign out buttons -->
-    <button type="button" class="btn" >
-    <button type="button" class="btn">
+   <button type="button" class="btn py-2 px-4 text-sm">Sign In</button>
+
+    <button type="button" class="btn py-2 px-4 text-sm">Sign In</button>
+
 
     <br> <br> <br> <!-- spacing -->
 
