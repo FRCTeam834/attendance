@@ -5,6 +5,40 @@
   let lastX = 0;
   let lastY = 0;
 
+  const submitAttendance = async (action) => {
+  const name = document.querySelector("select[name='Name']").value;
+
+  // Prevent "Select User" from being submitted
+  if (name === "Select User") {
+    alert("Please select a user first.");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/attendance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, action }),
+    });
+
+    const data = await res.json();
+    console.log(data);
+
+    if (data.error) {
+      alert(data.error);
+    } else {
+      alert(data.message);
+      // Refresh attendance table after update
+      await loadAttendance();
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Failed to connect to the server.");
+  }
+};
+
+
+
   // make the canvas
   const initCanvas = () => {
     ctx = canvas.getContext("2d");
@@ -96,14 +130,23 @@
 
     <!-- Name Dropdown -->
     <select name="Name" class="select select-bordered w-full max-w-xs" required>
-      <option value="Dominic">Dominic</option>
+      <option value="Select User">Select User</option>
+      <option value="Dominic Veneziale">Dominic Veneziale</option>
+      <option value="Vamu Srinivasan">Vamu Srinivasan</option>
+      <option value="Vedu Srinivasan">Vedu Srinivasan</option>
+      <option value="Varu Srinivasan">Varu Srinivasan</option>
+      <option value="Matthew Aung">Matthew Aung</option>
+      <option value="Gabe Magwood">Gabe Magwood</option>
+      <option value="Kyler Mooney">Kyler Mooney</option>
+      <option value="Maddie Oswald">Maddie Oswald</option>
+      <option value="Cooper Morgan">Cooper Morgan</option>
     </select>
     <br>
 
     <!-- sign in sign out buttons -->
    <button type="button" class="btn py-2 px-4 text-sm">Sign In</button>
 
-    <button type="button" class="btn py-2 px-4 text-sm">Sign In</button>
+    <button type="button" class="btn py-2 px-4 text-sm">Sign Out</button>
 
 
     <br> <br> <br> <!-- spacing -->

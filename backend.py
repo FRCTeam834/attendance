@@ -1,178 +1,104 @@
-from flask import Flask, request, jsonify
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import os
+# ----------------------------------------
+# ROBOTICS TEAM ATTENDANCE BACKEND (Neon Ready)
+# ----------------------------------------
 
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+import pytz
+
+# --- Initialize app ---
 app = Flask(__name__)
 
-# --- Database connection setup ---
-# Get database URL from environment variable, or fall back to a default one
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/mydb")
+# Allow Svelte frontend
+CORS(app, origins=["http://localhost:8080", "http://127.0.0.1:8080"], supports_credentials=True)
 
-# Connect to PostgreSQL database
-conn = psycopg2.connect(DATABASE_URL)
+# --- Neon Database URL (Correct format) ---
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    "postgresql://neondb_owner:npg_Ho2N4KipPbAk@"
+    "ep-orange-lake-adhvvwb0-pooler.c-2.us-east-1.aws.neon.tech/"
+    "neondb?sslmode=require"
+)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Use a cursor that returns rows as dictionaries instead of tuples
-cursor = conn.cursor(cursor_factory=RealDictCursor)
+db = SQLAlchemy(app)
 
+# --- Model ---
+class Attendance(db.Model):
+    __tablename__ = "attendance"  # Must match Neon table
 
-# --- Function to save match data into the database ---
-def insert_match_data(
-    name,
-    match_number,
-    team_number,
-    auton_left_community,
-    autonFourthCoral,
-    autonThirdCoral,
-    autonSecondCoral,
-    autonFirstCoral,
-    auton_moved_algae,
-    autonProcessor,
-    autonBarge,
-    teleopFourthCoral,
-    teleopThirdCoral,
-    teleopSecondCoral,
-    teleopFirstCoral,
-    teleopProcessor,
-    teleopBarge,
-    did_break,
-    defense,
-    shallow_climb,
-    deep_climb,
-    did_attempt_climb,
-    notes,
-):
-    # Put all values into a list, converting to the right type if needed
-    values = [
-        name or None,
-        int(match_number) if match_number else None,
-        int(team_number) if team_number else None,
-        auton_left_community or None,
-        autonFourthCoral or None,
-        autonThirdCoral or None,
-        autonSecondCoral or None,
-        autonFirstCoral or None,
-        auton_moved_algae or None,
-        autonProcessor or None,
-        autonBarge or None,
-        teleopFourthCoral or None,
-        teleopThirdCoral or None,
-        teleopSecondCoral or None,
-        teleopFirstCoral or None,
-        teleopProcessor or None,
-        teleopBarge or None,
-        did_break or None,
-        defense or None,
-        shallow_climb or None,
-        deep_climb or None,
-        did_attempt_climb or None,
-        notes or None,
-    ]
+    name = db.Column(db.String(100), primary_key=True)
+    signin_time = db.Column(db.DateTime, nullable=True)
+    signout_time = db.Column(db.DateTime, nullable=True)
+    total_hours = db.Column(db.Float, default=0.0)
 
-    # SQL query to insert match data into the "lehigh" table
-    sql = """
-    INSERT INTO lehigh (
-      name, match_number, team_number,
-      auton_left_community, autonFourthCoral, autonThirdCoral, autonSecondCoral, autonFirstCoral,
-      auton_moved_algae, autonProcessor, autonBarge,
-      teleopFourthCoral, teleopThirdCoral, teleopSecondCoral, teleopFirstCoral, teleopProcessor, teleopBarge,
-      did_break, defense, shallow_climb, deep_climb, did_attempt_climb, notes
-    )
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """
+# --- Helper for Eastern timezone ---
+def eastern_now():
+    return datetime.now(pytz.timezone("US/Eastern"))
 
-    # Run the SQL command with the provided values
-    cursor.execute(sql, values)
-
-    # Save (commit) changes to the database
-    conn.commit()
-
-
-# --- Function to save pit scouting data into the database ---
-def insert_pit_data(
-    pit_team_number,
-    pit_width,
-    pit_length,
-    pit_auton_starting_position,
-    pit_fourthcoral,
-    pit_thirdcoral,
-    pit_secondcoral,
-    pit_firstcoral,
-    pit_getcoral,
-    pit_algae,
-    pit_barge,
-    pit_processor,
-    pit_left_notes,
-    pit_middle_notes,
-    pit_right_notes,
-    pit_climb,
-    pit_notes,
-    pit_defense_notes,
-):
-    # Put all pit values into a list
-    values = [
-        pit_team_number or None,
-        pit_width or None,
-        pit_length or None,
-        pit_auton_starting_position or None,
-        pit_left_notes or None,
-        pit_middle_notes or None,
-        pit_right_notes or None,
-        pit_fourthcoral or None,
-        pit_thirdcoral or None,
-        pit_secondcoral or None,
-        pit_firstcoral or None,
-        pit_getcoral or None,
-        pit_algae or None,
-        pit_barge or None,
-        pit_processor or None,
-        pit_climb or None,
-        pit_notes or None,
-        pit_defense_notes or None,
-    ]
-
-    # SQL query to insert pit data into the "pit_lehigh" table
-    sql = """
-    INSERT INTO pit_lehigh (
-      pit_team_number, pit_width, pit_length,
-      pit_auton_starting_position, pit_left_notes, pit_middle_notes, pit_right_notes,
-      pit_fourthcoral, pit_thirdcoral, pit_secondcoral, pit_firstcoral, pit_getcoral, pit_algae,
-      pit_barge, pit_processor, pit_climb, pit_notes, pit_defense_notes
-    )
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """
-
-    # Run the SQL command with the provided values
-    cursor.execute(sql, values)
-
-    # Save (commit) changes to the database
-    conn.commit()
-
-
-# --- Flask API Endpoints (Routes) ---
-
-# Route for inserting match data
-@app.route("/insert_match", methods=["POST"])
-def insert_match_route():
-    data = request.json  # Get JSON data sent in the request
+# --- POST endpoint ---
+@app.route("/attendance", methods=["POST"])
+def attendance():
     try:
-        insert_match_data(**data)  # Pass the data to our function
-        return jsonify({"status": "success"}), 201  # Return success
+        data = request.get_json()
+        name = data.get("name")
+        action = data.get("action")
+
+        if not name or name == "Select User":
+            return jsonify({"error": "Please select a valid name."}), 400
+        if action not in ["Sign In", "Sign Out"]:
+            return jsonify({"error": "Invalid action."}), 400
+
+        user = Attendance.query.filter_by(name=name).first()
+        if not user:
+            return jsonify({"error": f"{name} not found in database."}), 404
+
+        now = eastern_now()
+
+        if action == "Sign In":
+            user.signin_time = now
+            db.session.commit()
+            return jsonify({
+                "message": f"{name} signed in successfully.",
+                "signin_time": now.strftime("%Y-%m-%d %H:%M:%S")
+            })
+
+        if action == "Sign Out":
+            if not user.signin_time:
+                return jsonify({"error": f"{name} has not signed in yet."}), 400
+
+            session_hours = (now - user.signin_time).total_seconds() / 3600
+            user.signout_time = now
+            user.total_hours += session_hours
+            user.signin_time = None
+            db.session.commit()
+
+            return jsonify({
+                "message": f"{name} signed out successfully.",
+                "signout_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+                "session_hours": round(session_hours, 2),
+                "total_hours": round(user.total_hours, 2)
+            })
+
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 400  # Return error
+        return jsonify({"error": str(e)}), 500
 
+# --- GET endpoint ---
+@app.route("/attendance", methods=["GET"])
+def get_all():
+    users = Attendance.query.order_by(Attendance.name).all()
+    data = []
+    for u in users:
+        data.append({
+            "name": u.name,
+            "signin_time": u.signin_time.strftime("%Y-%m-%d %H:%M:%S") if u.signin_time else "",
+            "signout_time": u.signout_time.strftime("%Y-%m-%d %H:%M:%S") if u.signout_time else "",
+            "total_hours": round(u.total_hours or 0.0, 2)
+        })
+    return jsonify(data)
 
-# Route for inserting pit data
-@app.route("/insert_pit", methods=["POST"])
-def insert_pit_route():
-    data = request.json  # Get JSON data sent in the request
-    try:
-        insert_pit_data(**data)  # Pass the data to our function
-        return jsonify({"status": "success"}), 201  # Return success
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 400  # Return error
-
-
-# --- Run the Flask app ---
+# --- Run server ---
 if __name__ == "__main__":
-    app.run(debug=True)  # Start the Flask server in debug mode
+    print("🚀 Flask backend running at http://127.0.0.1:5000")
+    app.run(debug=True, host="127.0.0.1", port=5000)
