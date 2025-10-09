@@ -93,8 +93,16 @@ def attendance():
                 return jsonify({"error": f"{name} has not signed in yet"}), 400
 
             # Parse signin_time string back to datetime for session calculation
-            signin_dt = datetime.strptime(student.signin_time, "%I:%M:%S %p")
+            # Combine today's date with signin_time for calculation
+            signin_time_only = datetime.strptime(student.signin_time, "%I:%M:%S %p").time()
+            signin_dt = datetime.combine(now.date(), signin_time_only)
+
+            # If sign-in was yesterday (i.e., current time < sign-in time), adjust
+            if signin_dt > now:
+                signin_dt = signin_dt.replace(day=now.day - 1)
+
             session_hours = (now - signin_dt).total_seconds() / 3600
+
 
             student.signout_time = time_str
             student.total_hours += session_hours
