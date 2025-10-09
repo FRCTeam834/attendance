@@ -5,37 +5,55 @@
   let lastX = 0;
   let lastY = 0;
 
+  let attendanceData = [];
+  let loading = false;
+  let selectedName = "Select User";
+
   const submitAttendance = async (action) => {
-  const name = document.querySelector("select[name='Name']").value;
-
-  // Prevent "Select User" from being submitted
-  if (name === "Select User") {
-    alert("Please select a user first.");
-    return;
-  }
-
-  try {
-    const res = await fetch("http://127.0.0.1:5000/attendance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, action }),
-    });
-
-    const data = await res.json();
-    console.log(data);
-
-    if (data.error) {
-      alert(data.error);
-    } else {
-      alert(data.message);
-      // Refresh attendance table after update
-      await loadAttendance();
+    // Prevent "Select User" from being submitted
+    if (selectedName === "Select User") {
+      alert("Please select a user first.");
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    alert("Failed to connect to the server.");
-  }
-};
+
+    loading = true;
+    try {
+      const res = await fetch("http://localhost:5000/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: selectedName, action }),
+      });
+
+      const data = await res.json();
+      console.log(data);
+
+      if (data.error) {
+        alert(data.error);
+      } else {
+        alert(data.message);
+        // Refresh attendance table after update
+        await loadAttendance();
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to connect to the server.");
+    } finally {
+      loading = false;
+    }
+  };
+
+  const loadAttendance = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/attendance");
+      const data = await res.json();
+      attendanceData = data;
+    } catch (err) {
+      console.error("Failed to load attendance data:", err);
+    }
+  };
+
+  // Load attendance data on component mount
+  onMount(loadAttendance);
 
 
 
@@ -129,7 +147,12 @@
     <br> <br> <br> <br>
 
     <!-- Name Dropdown -->
-    <select name="Name" class="select select-bordered w-full max-w-xs" required>
+    <select 
+      bind:value={selectedName} 
+      class="select select-bordered w-full max-w-xs" 
+      required
+      disabled={loading}
+    >
       <option value="Select User">Select User</option>
       <option value="Dominic Veneziale">Dominic Veneziale</option>
       <option value="Vamu Srinivasan">Vamu Srinivasan</option>
@@ -140,13 +163,40 @@
       <option value="Kyler Mooney">Kyler Mooney</option>
       <option value="Maddie Oswald">Maddie Oswald</option>
       <option value="Cooper Morgan">Cooper Morgan</option>
+      <option value="Joey Kohler">Joey Kohler</option>
+      <option value="Mason Gildein">Mason Gildein</option>
+      <option value="Juia Meaney">Julia Meaney</option>
+      <option value="Krupa Dihora">Krupa Dihora</option>
+      <option value="Yusef Seyed">Yusef Seyed</option>
+      <option value="John Coult">John Coult</option>
+      <option value="Mark Hernandez Guerra">Mark Hernandez Guerra</option>
+      <option value="John Coult">John Coult</option>
+      <option value="Dylan Braverman">Dylan Braverman</option>
+      <option value="Jackson Burmeister">Jackson Burmeister</option>
+      <option value="Karsten Immerzeal">Karsten Immerzeal</option>
+      <option value="Stanley Wempe">Stanley Wempe</option>
+      <option value="Victor Bodea">Victor Bodea</option>
     </select>
     <br>
 
     <!-- sign in sign out buttons -->
-   <button type="button" class="btn py-2 px-4 text-sm">Sign In</button>
+    <button 
+      type="button" 
+      class="btn py-2 px-4 text-sm" 
+      on:click={() => submitAttendance("Sign In")}
+      disabled={loading}
+    >
+      {loading ? "Processing..." : "Sign In"}
+    </button>
 
-    <button type="button" class="btn py-2 px-4 text-sm">Sign Out</button>
+    <button 
+      type="button" 
+      class="btn py-2 px-4 text-sm" 
+      on:click={() => submitAttendance("Sign Out")}
+      disabled={loading}
+    >
+      {loading ? "Processing..." : "Sign Out"}
+    </button>
 
 
     <br> <br> <br> <!-- spacing -->
@@ -168,6 +218,5 @@
     <br>
     <!-- Clear Button -->
     <button type="button" class="btn" on:click={clearCanvas}>Clear</button>
-     <button class="btn">submit</button>
   </form>
 </div>

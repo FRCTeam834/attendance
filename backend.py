@@ -1,104 +1,142 @@
-# ----------------------------------------
-# ROBOTICS TEAM ATTENDANCE BACKEND (Neon Ready)
-# ----------------------------------------
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import pytz
+import logging
+import sys
 
-# --- Initialize app ---
+# ---------------------------
+# APP SETUP
+# ---------------------------
 app = Flask(__name__)
+CORS(app, origins="*", supports_credentials=True)
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
-# Allow Svelte frontend
-CORS(app, origins=["http://localhost:8080", "http://127.0.0.1:8080"], supports_credentials=True)
-
-# --- Neon Database URL (Correct format) ---
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "postgresql://neondb_owner:npg_Ho2N4KipPbAk@"
-    "ep-orange-lake-adhvvwb0-pooler.c-2.us-east-1.aws.neon.tech/"
-    "neondb?sslmode=require"
-)
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
+# ---------------------------
+# DATABASE
+# ---------------------------
+DATABASE_URL = "postgresql://neondb_owner:npg_Ho2N4KipPbAk@ep-orange-lake-adhvvwb0-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require"
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# --- Model ---
 class Attendance(db.Model):
-    __tablename__ = "attendance"  # Must match Neon table
-
+    __tablename__ = "attendance"
     name = db.Column(db.String(100), primary_key=True)
-    signin_time = db.Column(db.DateTime, nullable=True)
-    signout_time = db.Column(db.DateTime, nullable=True)
+    signin_time = db.Column(db.String(20), nullable=True)   # stored as "08:45:00 PM"
+    signout_time = db.Column(db.String(20), nullable=True)
     total_hours = db.Column(db.Float, default=0.0)
 
-# --- Helper for Eastern timezone ---
-def eastern_now():
-    return datetime.now(pytz.timezone("US/Eastern"))
+with app.app_context():
+    try:
+        db.create_all()
+        logging.info("Database tables created successfully.")
+    except Exception as e:
+        logging.error(f"Failed to create tables: {e}")
 
-# --- POST endpoint ---
+# ---------------------------
+# HELPER
+# ---------------------------
+def get_eastern_time_naive():
+    """Return Eastern time as naive datetime."""
+    eastern = pytz.timezone("US/Eastern")
+    now = datetime.now(eastern)
+    return now.replace(tzinfo=None)
+
+def format_time_12hr(dt):
+    """Return a datetime in 12-hour format with AM/PM."""
+    return dt.strftime("%I:%M:%S %p") if dt else ""
+
+# ---------------------------
+# POST: Sign In / Sign Out
+# ---------------------------
 @app.route("/attendance", methods=["POST"])
 def attendance():
+    data = request.get_json()
+    logging.info(f"Received POST data: {data}")
+
+    if not data:
+        return jsonify({"error": "Invalid request, JSON required"}), 400
+
+    name = data.get("name")
+    action = data.get("action")
+
+    if not name or name == "Select User":
+        return jsonify({"error": "Name is required"}), 400
+    if action not in ["Sign In", "Sign Out"]:
+        return jsonify({"error": "Action must be 'Sign In' or 'Sign Out'"}), 400
+
+    now = get_eastern_time_naive()
+    time_str = format_time_12hr(now)  # 12-hour string with AM/PM
+
     try:
-        data = request.get_json()
-        name = data.get("name")
-        action = data.get("action")
-
-        if not name or name == "Select User":
-            return jsonify({"error": "Please select a valid name."}), 400
-        if action not in ["Sign In", "Sign Out"]:
-            return jsonify({"error": "Invalid action."}), 400
-
-        user = Attendance.query.filter_by(name=name).first()
-        if not user:
-            return jsonify({"error": f"{name} not found in database."}), 404
-
-        now = eastern_now()
+        student = Attendance.query.filter_by(name=name).first()
 
         if action == "Sign In":
-            user.signin_time = now
+            if student:
+                student.signin_time = time_str
+                student.signout_time = None
+            else:
+                student = Attendance(name=name, signin_time=time_str)
+                db.session.add(student)
+
             db.session.commit()
+            logging.info(f"{name} signed in at {time_str}")
             return jsonify({
-                "message": f"{name} signed in successfully.",
-                "signin_time": now.strftime("%Y-%m-%d %H:%M:%S")
+                "message": f"{name} signed in",
+                "signin_time": time_str
             })
 
         if action == "Sign Out":
-            if not user.signin_time:
-                return jsonify({"error": f"{name} has not signed in yet."}), 400
+            if not student or not student.signin_time:
+                return jsonify({"error": f"{name} has not signed in yet"}), 400
 
-            session_hours = (now - user.signin_time).total_seconds() / 3600
-            user.signout_time = now
-            user.total_hours += session_hours
-            user.signin_time = None
+            # Parse signin_time string back to datetime for session calculation
+            signin_dt = datetime.strptime(student.signin_time, "%I:%M:%S %p")
+            session_hours = (now - signin_dt).total_seconds() / 3600
+
+            student.signout_time = time_str
+            student.total_hours += session_hours
+
             db.session.commit()
+            logging.info(f"{name} signed out at {time_str}, session hours: {session_hours:.2f}")
 
             return jsonify({
-                "message": f"{name} signed out successfully.",
-                "signout_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+                "message": f"{name} signed out",
+                "signout_time": time_str,
                 "session_hours": round(session_hours, 2),
-                "total_hours": round(user.total_hours, 2)
+                "total_hours": round(student.total_hours, 2)
             })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logging.error(f"Database error: {e}")
+        return jsonify({"error": "Database operation failed"}), 500
 
-# --- GET endpoint ---
+# ---------------------------
+# GET: Attendance Table
+# ---------------------------
 @app.route("/attendance", methods=["GET"])
-def get_all():
-    users = Attendance.query.order_by(Attendance.name).all()
-    data = []
-    for u in users:
-        data.append({
-            "name": u.name,
-            "signin_time": u.signin_time.strftime("%Y-%m-%d %H:%M:%S") if u.signin_time else "",
-            "signout_time": u.signout_time.strftime("%Y-%m-%d %H:%M:%S") if u.signout_time else "",
-            "total_hours": round(u.total_hours or 0.0, 2)
-        })
-    return jsonify(data)
+def get_attendance():
+    try:
+        students = Attendance.query.all()
+        data = []
+        for s in students:
+            data.append({
+                "name": s.name,
+                "signin_time": s.signin_time,
+                "signout_time": s.signout_time,
+                "total_hours": round(s.total_hours, 2)
+            })
+        logging.info(f"Sending attendance table with {len(data)} rows")
+        return jsonify(data)
+    except Exception as e:
+        logging.error(f"Failed to fetch attendance: {e}")
+        return jsonify({"error": "Database query failed"}), 500
 
-# --- Run server ---
+# ---------------------------
+# RUN
+# ---------------------------
 if __name__ == "__main__":
-    print("🚀 Flask backend running at http://127.0.0.1:5000")
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    logging.info("Starting Flask server on port 5000...")
+    app.run(debug=True, host="0.0.0.0", port=5000)
