@@ -127,7 +127,8 @@
   }
 
   canvas {
-    border: 1px solid #ccc;
+    border: 8px solid #ffffff;
+    background-color: rgb(215, 211, 255);
     cursor: crosshair;
     margin-top: 20px;
   }
@@ -204,7 +205,7 @@
     <!-- Canvas for Drawing -->
     <canvas
       bind:this={canvas}
-      width="400"
+      width="600"
       height="300"
       on:mousedown={startDrawing}
       on:mousemove={draw}
