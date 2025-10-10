@@ -128,7 +128,7 @@
 
   canvas {
     border: 8px solid #ffffff;
-    background-color: rgb(215, 211, 255);
+    background-color: rgb(243, 146, 189);
     cursor: crosshair;
     margin-top: 20px;
   }
@@ -156,7 +156,7 @@
     >
       <option value="Select User">Select User</option>
       <option value="Dominic Veneziale">Dominic Veneziale</option>
-       <option value="Julia Meaney">Julia Meaney</option>
+      <option value="Julia Meaney">Julia Meaney</option>
       <option value="Vamu Srinivasan">Vamu Srinivasan</option>
       <option value="Vedu Srinivasan">Vedu Srinivasan</option>
       <option value="Varu Srinivasan">Varu Srinivasan</option>
@@ -177,6 +177,36 @@
       <option value="Karsten Immerzeal">Karsten Immerzeal</option>
       <option value="Stanley Wempe">Stanley Wempe</option>
       <option value="Victor Bodea">Victor Bodea</option>
+      <option value="Alez Gualfieri">Alez Gualfieri</option>
+      <option value="Ani Hari">Ani Hari</option>
+      <option value="Aubrey Cressnan">Aubrey Cressnan</option>
+      <option value="Ben Snyder">Ben Snyder</option>
+      <option value="Conner Male">Conner Male</option>
+      <option value="Daytona Christman">Daytona Christman</option>
+      <option value="Daniel Kim">Daniel Kim</option>
+      <option value="Emma Husvar">Emma Husvar</option>
+      <option value="Geo Jung">Geo Jung</option>
+      <option value="Grace Russell">Grace Russell</option>
+      <option value="Grant Hufgard">Grant Hufgard</option>
+      <option value="Isabella O.A.">Isabella O.A.</option>
+      <option value="Jake Tsyvine">Jake Tsyvine</option>
+      <option value="Jayee Lin">Jayee Lin</option>
+      <option value="Joey Kholer">Joey Kholer</option>
+      <option value="John Cult">John Cult</option>
+      <option value="Karsten Immerzeel">Karsten Immerzeel</option>
+      <option value="Manas Pol">Manas Pol</option>
+      <option value="Matthew Ryan">Matthew Ryan</option>
+      <option value="Myles Bartholomew">Myles Bartholomew</option>
+      <option value="Paytuna A.">Paytuna A.</option>
+      <option value="Quinn Ham">Quinn Ham</option>
+      <option value="Ritwika Veeravalli">Ritwika Veeravalli</option>
+      <option value="Sebastian Velez">Sebastian Velez</option>
+      <option value="Trace Willaims">Trace Willaims</option>
+      <option value="Vaaman Srinivasan">Vaaman Srinivasan</option>
+      <option value="Vanessa Trbuza">Vanessa Trbuza</option>
+      <option value="Varahan Srinivasan">Varahan Srinivasan</option>
+      <option value="Vedanth Srinivasan">Vedanth Srinivasan</option>
+      <option value="Yusef Syed">Yusef Syed</option>
     </select>
     <br>
 
