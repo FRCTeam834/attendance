@@ -142,6 +142,25 @@
     margin: 10px;
   }
 </style>
+<!--images-->
+<!--image one-->
+<img 
+  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  alt="Flower Image"
+  style="width: 125px; height: auto; position: absolute; top: 150px; left: 450px;" 
+/>
+<!--image two-->
+<img 
+  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  alt="Flower Image"
+  style="width: 115px; height: auto; position: absolute; top: 550px; left: 350px;" 
+/>
+<img 
+  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  alt="Flower Image"
+  style="width: 115px; height: auto; position: absolute; top: 600px; left: 450px; transform: rotate(45deg);" 
+/>
+
 
 <div class="center-wrapper">
   <form method="POST" class="form-container">
