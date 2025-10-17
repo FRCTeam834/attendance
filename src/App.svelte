@@ -155,11 +155,44 @@
   alt="Flower Image"
   style="width: 115px; height: auto; position: absolute; top: 550px; left: 350px;" 
 />
+<!--image three-->
 <img 
   src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
   alt="Flower Image"
-  style="width: 115px; height: auto; position: absolute; top: 600px; left: 450px; transform: rotate(45deg);" 
+  style="width: 150px; height: auto; position: absolute; top: 625px; left: 430px; transform: rotate(45deg);" 
+
 />
+<!--image four-->
+<img 
+  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  alt="Flower Image"
+  style="width: 75px; height: auto; position: absolute; top: 650px; left: 1150px;" 
+/>
+<!--image five-->
+<img 
+  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  alt="Flower Image"
+  style="width: 75px; height: auto; position: absolute; top: 650px; left: 1150px;" 
+/>
+<!--image six-->
+<img 
+  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  alt="Flower Image"
+  style="width: 75px; height: auto; position: absolute; top: 275px; left: 1150px;" 
+/>
+<!--image seven-->
+<img 
+  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  alt="Flower Image"
+  style="width: 100px; height: auto; position: absolute; top: 175px; left: 1200px;transform: rotate(15deg);" 
+/>
+<!--image eight-->
+<img 
+  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0mH_LuALiH9vAkE9pc40SJNHnCzhAzDXccA&s" 
+  alt="Flower Image"
+  style="width: 150px; height: auto; position: absolute; top: 260px; left: 1250px;" 
+/>
+
 
 
 <div class="center-wrapper">
