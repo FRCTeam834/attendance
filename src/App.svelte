@@ -188,10 +188,38 @@
 />
 <!--image eight-->
 <img 
-  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0mH_LuALiH9vAkE9pc40SJNHnCzhAzDXccA&s" 
+  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
   alt="Flower Image"
-  style="width: 150px; height: auto; position: absolute; top: 260px; left: 1250px;" 
+  style="width: 150px; height: auto; position: absolute; top: 250px; left: 1250px;" 
 />
+<!--image nine-->
+<img 
+  src="https://www.clker.com/cliparts/m/X/7/J/1/m/pink-vine-hi.png" 
+  alt="Flower Image"
+  style="width: 150px; height: auto; position: absolute; top: 350px; left: 1150px;transform: rotate(150deg)" 
+/>
+<!--image ten-->
+<img 
+  src="https://www.clker.com/cliparts/m/X/7/J/1/m/pink-vine-hi.png" 
+  alt="Flower Image"
+  style="width: 150px; height: auto; position: absolute; top: 125px; left: 1050px;transform: rotate(270deg)" 
+/>
+
+<!--image eleven-->
+<img 
+  src="https://www.clker.com/cliparts/m/X/7/J/1/m/pink-vine-hi.png" 
+  alt="Flower Image"
+  style="width: 150px; height: auto; position: absolute; top: 400px; left: 300px;transform: rotate(350deg)" 
+/>
+
+<!--image twelve-->
+<img 
+  src="https://www.clker.com/cliparts/m/X/7/J/1/m/pink-vine-hi.png" 
+  alt="Flower Image"
+  style="width: 150px; height: auto; position: absolute; top: 600px; left: 600px;transform: rotate(60deg)" 
+/>
+
+
 
 
 
