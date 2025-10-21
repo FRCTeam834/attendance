@@ -128,7 +128,7 @@
 
   canvas {
     border: 8px solid #ffffff;
-    background-color: rgb(243, 146, 189);
+    background-color: rgb(65, 105, 225);
     cursor: crosshair;
     margin-top: 20px;
   }
@@ -144,79 +144,81 @@
 </style>
 <!--images-->
 <!--image one-->
-<img 
-  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
-  alt="Flower Image"
-  style="width: 125px; height: auto; position: absolute; top: 150px; left: 450px;" 
-/>
+<a href="https://imgbb.com/">
+  <img 
+    src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+    alt="Flower image"
+    style="width: 125px; height: auto; position: absolute; top: 150px; left: 450px;" />
+</a>
+
 <!--image two-->
 <img 
-  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
   alt="Flower Image"
   style="width: 115px; height: auto; position: absolute; top: 550px; left: 350px;" 
 />
 <!--image three-->
 <img 
-  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
   alt="Flower Image"
   style="width: 150px; height: auto; position: absolute; top: 625px; left: 430px; transform: rotate(45deg);" 
 
 />
 <!--image four-->
 <img 
-  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
   alt="Flower Image"
   style="width: 75px; height: auto; position: absolute; top: 650px; left: 1150px;" 
 />
 <!--image five-->
 <img 
-  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
   alt="Flower Image"
   style="width: 75px; height: auto; position: absolute; top: 650px; left: 1150px;" 
 />
 <!--image six-->
 <img 
-  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
   alt="Flower Image"
   style="width: 75px; height: auto; position: absolute; top: 275px; left: 1150px;" 
 />
 <!--image seven-->
 <img 
-  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
   alt="Flower Image"
   style="width: 100px; height: auto; position: absolute; top: 175px; left: 1200px;transform: rotate(15deg);" 
 />
 <!--image eight-->
 <img 
-  src="https://cdn.creazilla.com/cliparts/3229379/flower-pink-clipart-sm.png" 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
   alt="Flower Image"
   style="width: 150px; height: auto; position: absolute; top: 250px; left: 1250px;" 
 />
 <!--image nine-->
 <img 
-  src="https://www.clker.com/cliparts/m/X/7/J/1/m/pink-vine-hi.png" 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
   alt="Flower Image"
-  style="width: 150px; height: auto; position: absolute; top: 350px; left: 1150px;transform: rotate(150deg)" 
+  style="width: 250px; height: auto; position: absolute; top: 350px; left: 1100px;transform: rotate(150deg)" 
 />
 <!--image ten-->
 <img 
-  src="https://www.clker.com/cliparts/m/X/7/J/1/m/pink-vine-hi.png" 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
   alt="Flower Image"
-  style="width: 150px; height: auto; position: absolute; top: 125px; left: 1050px;transform: rotate(270deg)" 
+  style="width: 250px; height: auto; position: absolute; top: 125px; left: 975px;transform: rotate(270deg)" 
 />
 
 <!--image eleven-->
 <img 
-  src="https://www.clker.com/cliparts/m/X/7/J/1/m/pink-vine-hi.png" 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
   alt="Flower Image"
-  style="width: 150px; height: auto; position: absolute; top: 400px; left: 300px;transform: rotate(350deg)" 
+  style="width: 250px; height: auto; position: absolute; top: 400px; left: 300px;transform: rotate(350deg)" 
 />
 
 <!--image twelve-->
 <img 
-  src="https://www.clker.com/cliparts/m/X/7/J/1/m/pink-vine-hi.png" 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
   alt="Flower Image"
-  style="width: 150px; height: auto; position: absolute; top: 600px; left: 600px;transform: rotate(60deg)" 
+  style="width: 250px; height: auto; position: absolute; top: 600px; left: 550px;transform: rotate(60deg)" 
 />
 
 
