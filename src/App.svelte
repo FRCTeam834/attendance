@@ -1,4 +1,6 @@
 <script>
+  import { onMount } from "svelte";
+
   let canvas;
   let ctx;
   let isDrawing = false;
@@ -17,7 +19,7 @@
 
     loading = true;
     try {
-      const res = await fetch("http://localhost:5000/attendance", {
+      const res = await fetch("/api/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: selectedName, action }),
@@ -42,7 +44,7 @@
 
   const loadAttendance = async () => {
     try {
-      const res = await fetch("http://localhost:5000/attendance");
+      const res = await fetch("/api/attendance");
       const data = await res.json();
       attendanceData = data;
     } catch (err) {
@@ -50,7 +52,6 @@
     }
   };
 
-  import { onMount } from "svelte";
   onMount(loadAttendance);
 
   const initCanvas = () => {
