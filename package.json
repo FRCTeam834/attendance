@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public --no-clear --port 3000",
-    "tw": "tailwindcss -i ./src/app.css -o ./public/tailwind.css -w"
-  },
+ "scripts": {
+  "build": "npx rollup -c",
+  "dev": "npx rollup -c -w",
+  "start": "npx sirv public --no-clear --port 3000",
+  "tw": "npx tailwindcss -i ./src/app.css -o ./public/tailwind.css -w"
+},
+
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
