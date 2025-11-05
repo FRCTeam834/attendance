@@ -24,6 +24,7 @@
     "tailwindcss": "^4.1.13"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "@tailwindcss/cli": "^4.1.13",
     "sirv-cli": "^2.0.0"
   }

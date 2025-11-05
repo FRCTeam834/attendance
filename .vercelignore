@@ -1,0 +1,10 @@
+requirements.txt
+Pipfile
+Pipfile.lock
+poetry.lock
+pyproject.toml
+runtime.txt
+Procfile
+setup.py
+setup.cfg
+**/*.py
