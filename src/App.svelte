@@ -1,6 +1,4 @@
 <script>
-  import { onMount } from "svelte";
-
   let canvas;
   let ctx;
   let isDrawing = false;
@@ -16,22 +14,27 @@
       alert("Please select a user first.");
       return;
     }
+
     loading = true;
     try {
-      const res = await fetch("/api/attendance", {
+      const res = await fetch("http://localhost:5000/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: selectedName, action })
+        body: JSON.stringify({ name: selectedName, action }),
       });
+
       const data = await res.json();
-      if (data.error) alert(data.error);
-      else {
+      console.log(data);
+
+      if (data.error) {
+        alert(data.error);
+      } else {
         alert(data.message);
         await loadAttendance();
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to reach the server.");
+      alert("Failed to connect to the server.");
     } finally {
       loading = false;
     }
@@ -39,13 +42,15 @@
 
   const loadAttendance = async () => {
     try {
-      const res = await fetch("/api/attendance");
-      attendanceData = await res.json();
+      const res = await fetch("http://localhost:5000/attendance");
+      const data = await res.json();
+      attendanceData = data;
     } catch (err) {
       console.error("Failed to load attendance data:", err);
     }
   };
 
+  import { onMount } from "svelte";
   onMount(loadAttendance);
 
   const initCanvas = () => {
@@ -59,75 +64,233 @@
   const getPosition = (e) => {
     const rect = canvas.getBoundingClientRect();
     let x, y;
+
     if (e.touches) {
-      const t = e.touches[0];
-      x = t.clientX - rect.left;
-      y = t.clientY - rect.top;
+      const touch = e.touches[0];
+      x = touch.clientX - rect.left;
+      y = touch.clientY - rect.top;
     } else {
       x = e.offsetX;
       y = e.offsetY;
     }
+
     return { x, y };
   };
 
   const startDrawing = (e) => {
     e.preventDefault();
     isDrawing = true;
+
     const { x, y } = getPosition(e);
     [lastX, lastY] = [x, y];
   };
 
   const draw = (e) => {
     if (!isDrawing) return;
+
     const { x, y } = getPosition(e);
+
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
+
     [lastX, lastY] = [x, y];
   };
 
-  const stopDrawing = () => { isDrawing = false; };
-  const clearCanvas = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const stopDrawing = () => {
+    isDrawing = false;
+  };
+
+  const clearCanvas = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
 
   onMount(initCanvas);
-
-  const names = [
-    "Select User",
-    "Dominic Veneziale","Julia Meaney","Vamu Srinivasan","Vedu Srinivasan","Varu Srinivasan",
-    "Matthew Aung","Gabe Magwood","Kyler Mooney","Maddie Oswald","Cooper Morgan","Joey Kohler",
-    "Mason Gildein","Krupa Dihora","Yusef Seyed","John Coult","Mark Hernandez Guerra","Dylan Braverman",
-    "Jackson Burmeister","Karsten Immerzeal","Stanley Wempe","Victor Bodea","Alez Gualfieri","Ani Hari",
-    "Aubrey Cressnan","Ben Snyder","Conner Male","Daytona Christman","Daniel Kim","Emma Husvar",
-    "Geo Jung","Grace Russell","Grant Hufgard","Isabella O.A.","Jake Tsyvine","Jayee Lin","Joey Kholer",
-    "John Cult","Karsten Immerzeel","Manas Pol","Matthew Ryan","Myles Bartholomew","Paytuna A.",
-    "Quinn Ham","Ritwika Veeravalli","Sebastian Velez","Trace Willaims","Vaaman Srinivasan",
-    "Vanessa Trbuza","Varahan Srinivasan","Vedanth Srinivasan","Yusef Syed","Akshaya Guduru","Anand Kunnath"
-  ];
 </script>
 
-<div class="container">
-  <div class="card">
-    <h1 class="title">SparTechs Attendance</h1>
+<style>
+  .center-wrapper {
+    text-align: center;
+  }
 
-    <label>Member</label><br />
-    <select bind:value={selectedName} disabled={loading} class="select">
-      {#each names as n}
-        <option value={n}>{n}</option>
-      {/each}
+  canvas {
+    border: 8px solid #ffffff;
+    background-color: rgb(65, 105, 225);
+    cursor: crosshair;
+    margin-top: 20px;
+  }
+
+  .form-container {
+    display: inline-block;
+    text-align: center;
+  }
+
+  select, button {
+    margin: 10px;
+  }
+</style>
+
+<a href="https://imgbb.com/">
+  <img 
+    src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+    alt="Flower image"
+    style="width: 125px; height: auto; position: absolute; top: 150px; left: 450px;" />
+</a>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 115px; height: auto; position: absolute; top: 550px; left: 350px;" 
+/>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 150px; height: auto; position: absolute; top: 625px; left: 430px; transform: rotate(45deg);" 
+/>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 75px; height: auto; position: absolute; top: 650px; left: 1150px;" 
+/>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 75px; height: auto; position: absolute; top: 650px; left: 1150px;" 
+/>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 75px; height: auto; position: absolute; top: 275px; left: 1150px;" 
+/>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 100px; height: auto; position: absolute; top: 175px; left: 1200px;transform: rotate(15deg);" 
+/>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 150px; height: auto; position: absolute; top: 250px; left: 1250px;" 
+/>
+
+<img 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
+  alt="Flower Image"
+  style="width: 250px; height: auto; position: absolute; top: 350px; left: 1100px;transform: rotate(150deg)" 
+/>
+
+<img 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
+  alt="Flower Image"
+  style="width: 250px; height: auto; position: absolute; top: 125px; left: 975px;transform: rotate(270deg)" 
+/>
+
+<img 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
+  alt="Flower Image"
+  style="width: 250px; height: auto; position: absolute; top: 400px; left: 300px;transform: rotate(350deg)" 
+/>
+
+<img 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
+  alt="Flower Image"
+  style="width: 250px; height: auto; position: absolute; top: 600px; left: 550px;transform: rotate(60deg)" 
+/>
+
+<div class="center-wrapper">
+  <form method="POST" class="form-container">
+    <br> <br> <br> <br>
+
+    <select 
+      bind:value={selectedName} 
+      class="select select-bordered w-full max-w-xs" 
+      required
+      disabled={loading}
+    >
+      <option value="Select User">Select User</option>
+      <option value="Dominic Veneziale">Dominic Veneziale</option>
+      <option value="Julia Meaney">Julia Meaney</option>
+      <option value="Vamu Srinivasan">Vamu Srinivasan</option>
+      <option value="Vedu Srinivasan">Vedu Srinivasan</option>
+      <option value="Varu Srinivasan">Varu Srinivasan</option>
+      <option value="Matthew Aung">Matthew Aung</option>
+      <option value="Gabe Magwood">Gabe Magwood</option>
+      <option value="Kyler Mooney">Kyler Mooney</option>
+      <option value="Maddie Oswald">Maddie Oswald</option>
+      <option value="Cooper Morgan">Cooper Morgan</option>
+      <option value="Joey Kohler">Joey Kohler</option>
+      <option value="Mason Gildein">Mason Gildein</option>
+      <option value="Krupa Dihora">Krupa Dihora</option>
+      <option value="Yusef Seyed">Yusef Seyed</option>
+      <option value="John Coult">John Coult</option>
+      <option value="Mark Hernandez Guerra">Mark Hernandez Guerra</option>
+      <option value="John Coult">John Coult</option>
+      <option value="Dylan Braverman">Dylan Braverman</option>
+      <option value="Jackson Burmeister">Jackson Burmeister</option>
+      <option value="Karsten Immerzeal">Karsten Immerzeal</option>
+      <option value="Stanley Wempe">Stanley Wempe</option>
+      <option value="Victor Bodea">Victor Bodea</option>
+      <option value="Alez Gualfieri">Alez Gualfieri</option>
+      <option value="Ani Hari">Ani Hari</option>
+      <option value="Aubrey Cressnan">Aubrey Cressnan</option>
+      <option value="Ben Snyder">Ben Snyder</option>
+      <option value="Conner Male">Conner Male</option>
+      <option value="Daytona Christman">Daytona Christman</option>
+      <option value="Daniel Kim">Daniel Kim</option>
+      <option value="Emma Husvar">Emma Husvar</option>
+      <option value="Geo Jung">Geo Jung</option>
+      <option value="Grace Russell">Grace Russell</option>
+      <option value="Grant Hufgard">Grant Hufgard</option>
+      <option value="Isabella O.A.">Isabella O.A.</option>
+      <option value="Jake Tsyvine">Jake Tsyvine</option>
+      <option value="Jayee Lin">Jayee Lin</option>
+      <option value="Joey Kholer">Joey Kholer</option>
+      <option value="John Cult">John Cult</option>
+      <option value="Karsten Immerzeel">Karsten Immerzeel</option>
+      <option value="Manas Pol">Manas Pol</option>
+      <option value="Matthew Ryan">Matthew Ryan</option>
+      <option value="Myles Bartholomew">Myles Bartholomew</option>
+      <option value="Paytuna A.">Paytuna A.</option>
+      <option value="Quinn Ham">Quinn Ham</option>
+      <option value="Ritwika Veeravalli">Ritwika Veeravalli</option>
+      <option value="Sebastian Velez">Sebastian Velez</option>
+      <option value="Trace Willaims">Trace Willaims</option>
+      <option value="Vaaman Srinivasan">Vaaman Srinivasan</option>
+      <option value="Vanessa Trbuza">Vanessa Trbuza</option>
+      <option value="Varahan Srinivasan">Varahan Srinivasan</option>
+      <option value="Vedanth Srinivasan">Vedanth Srinivasan</option>
+      <option value="Yusef Syed">Yusef Syed</option>
+      <option value="Akshaya Guduru">Akshaya Guduru</option>
+      <option value="Anand Kunnath">Anand Kunnath</option>
     </select>
+    <br>
 
-    <div class="spacer-sm"></div>
-
-    <button on:click={() => submitAttendance("Sign In")} disabled={loading} class="btn">
+    <button 
+      type="button" 
+      class="btn py-2 px-4 text-sm" 
+      on:click={() => submitAttendance("Sign In")}
+      disabled={loading}
+    >
       {loading ? "Processing..." : "Sign In"}
     </button>
-    <span class="gap"></span>
-    <button on:click={() => submitAttendance("Sign Out")} disabled={loading} class="btn">
+
+    <button 
+      type="button" 
+      class="btn py-2 px-4 text-sm" 
+      on:click={() => submitAttendance("Sign Out")}
+      disabled={loading}
+    >
       {loading ? "Processing..." : "Sign Out"}
     </button>
 
-    <div class="spacer"></div>
+    <br> <br> <br>
 
     <canvas
       bind:this={canvas}
@@ -142,53 +305,7 @@
       on:touchend={stopDrawing}
       on:touchcancel={stopDrawing}
     ></canvas>
-    <br />
-    <button on:click={clearCanvas} class="btn">Clear</button>
-
-    <div class="spacer"></div>
-
-    <h2 class="subtitle">Recent Activity</h2>
-    <table class="table">
-      <thead>
-        <tr><th>When</th><th>Name</th><th>Action</th></tr>
-      </thead>
-      <tbody>
-        {#each attendanceData as row}
-          <tr>
-            <td>{new Date(row.ts).toLocaleString()}</td>
-            <td>{row.name}</td>
-            <td>{row.action}</td>
-          </tr>
-        {/each}
-        {#if attendanceData.length === 0}
-          <tr><td colspan="3">No entries yet.</td></tr>
-        {/if}
-      </tbody>
-    </table>
-  </div>
+    <br>
+    <button type="button" class="btn" on:click={clearCanvas}>Clear</button>
+  </form>
 </div>
-
-<style>
-  :root {
-    --bg: #0b1020;
-    --panel: #111a33;
-    --text: #f1f5f9;
-    --btn: #2563eb;
-  }
-  html, body, #app { height: 100%; margin: 0; }
-  body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
-  .container { max-width: 960px; margin: 0 auto; padding: 24px; }
-  .card { background: var(--panel); border-radius: 14px; padding: 20px; box-shadow: 0 10px 24px rgba(0,0,0,.25); }
-  .title { margin: 0 0 8px 0; }
-  .subtitle { margin: 0 0 8px 0; }
-  .select { margin-top: 6px; min-width: 260px; padding: 6px 8px; border-radius: 8px; }
-  .btn { background: var(--btn); color: white; border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
-  .btn[disabled] { opacity: 0.6; cursor: not-allowed; }
-  .gap { display:inline-block; width: 8px; }
-  .spacer-sm { height: 10px; }
-  .spacer { height: 24px; }
-  .table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-  .table th, .table td { text-align: left; padding: 8px; }
-  .table tr:nth-child(even) { background: rgba(255,255,255,0.06); }
-  canvas { border: 8px solid #ffffff; background-color: rgb(65, 105, 225); cursor: crosshair; margin-top: 20px; }
-</style>
