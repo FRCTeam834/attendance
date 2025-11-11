@@ -279,7 +279,7 @@
       on:touchmove={draw}
       on:touchend={stopDrawing}
       on:touchcancel={stopDrawing}
-      style="border:8px solid #ffffff; background:#4169e1; cursor:crosshair; margin-top:6px;"
+      style=" cursor:crosshair; margin-top:6px;"
     ></canvas>
 
     <button type="button" class="btn" on:click={clearCanvas}>Clear</button>
