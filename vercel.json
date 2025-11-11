@@ -1,5 +1,5 @@
 {
-  "framework": null,
-  "buildCommand": "npm run build",
-  "devCommand": "npm run start -- --port %PORT%"
+  "functions": {
+    "api/*.js": { "runtime": "nodejs22.x" }
+  }
 }
