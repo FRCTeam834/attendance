@@ -187,7 +187,8 @@
 
 <!-- ============== CENTERED UI LAYER (strong inline centering) ============== -->
 <div style="position:fixed; inset:0; display:grid; place-items:center; z-index:50;">
-  <div style="display:flex; flex-direction:column; align-items:center; gap:12px; background:rgba(255,255,255,.85); padding:16px 20px; 8px 24px rgba(0,0,0,.12);">
+  <div style="display:flex; flex-direction:column; align-items:center; gap:12px;
+            background:transparent; padding:0; border-radius:0; box-shadow:none;">
     <div style="display:flex; gap:12px; justify-content:center; width:100%; flex-wrap:wrap;">
       <select bind:value={selectedName} required disabled={loading} style="min-width:220px;">
         <option value="Select User">Select User</option>
