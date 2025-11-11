@@ -1,89 +1,77 @@
-// api/attendance.js
-const { pool } = require('./_db');
+import sql from './_db.js';
 
-// ONE TABLE schema idea:
-// CREATE TABLE totals (
-//   name TEXT PRIMARY KEY,
-//   total_minutes INTEGER NOT NULL DEFAULT 0,
-//   is_checked_in BOOLEAN NOT NULL DEFAULT FALSE,
-//   last_checkin TIMESTAMPTZ
-// );
-
-module.exports = async (req, res) => {
-  if (req.method === 'GET') {
-    // optional: return current totals
-    try {
-      const { rows } = await pool.query(
-        `SELECT name, total_minutes, is_checked_in, last_checkin
-         FROM totals
-         ORDER BY name`
-      );
-      return res.status(200).json(rows);
-    } catch (e) {
-      if (String(e).includes('relation "totals" does not exist')) {
-        return res.status(400).json({
-          error: 'Table "totals" not found. Run the migration SQL shown in /api/migrate (see below).',
-        });
-      }
-      return res.status(500).json({ error: String(e) });
-    }
+function cors(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return true;
   }
+  return false;
+}
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Use POST { name, action }' });
-  }
-
+export default async function handler(req, res) {
   try {
-    const { name, action } = req.body || {};
-    if (!name || !action) {
-      return res.status(400).json({ error: 'Missing name or action' });
+    if (cors(req, res)) return;
+
+    if (req.method === 'GET') {
+      // optional: list open sessions
+      const open = await sql`select id, name, start_at from sessions where end_at is null order by start_at desc`;
+      return res.status(200).json(open);
     }
+
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    const { name, action } = req.body || {};
+    if (!name || !action) return res.status(400).json({ error: 'Missing name or action' });
 
     if (action === 'Sign In') {
-      // Upsert row; if already checked in, do nothing
-      const upsert = `
-        INSERT INTO totals (name, total_minutes, is_checked_in, last_checkin)
-        VALUES ($1, 0, TRUE, NOW())
-        ON CONFLICT (name)
-        DO UPDATE SET
-          last_checkin = CASE WHEN totals.is_checked_in = FALSE THEN NOW() ELSE totals.last_checkin END,
-          is_checked_in = TRUE
-        RETURNING name, total_minutes, is_checked_in, last_checkin;
-      `;
-      const { rows } = await pool.query(upsert, [name]);
-      return res.status(200).json({ message: 'Checked in', record: rows[0] });
+      // prevent double sign-in (one open session per person)
+      const [{ count }] = await sql`select count(*)::int from sessions where name=${name} and end_at is null`;
+      if (count > 0) return res.status(400).json({ error: `${name} already signed in` });
+
+      await sql`insert into sessions (name) values (${name})`;
+      return res.status(200).json({ ok: true, message: `${name} signed in` });
     }
 
     if (action === 'Sign Out') {
-      // Add elapsed minutes (now - last_checkin) if currently checked in
-      const update = `
-        UPDATE totals
-        SET
-          total_minutes = CASE
-            WHEN is_checked_in = TRUE AND last_checkin IS NOT NULL
-            THEN total_minutes + CEIL(EXTRACT(EPOCH FROM (NOW() - last_checkin))/60.0)::int
-            ELSE total_minutes
-          END,
-          is_checked_in = FALSE,
-          last_checkin = NULL
-        WHERE name = $1
-        RETURNING name, total_minutes, is_checked_in, last_checkin;
+      // close the latest open session for this name
+      const closed = await sql`
+        update sessions
+           set end_at = now()
+         where id = (
+           select id from sessions
+            where name = ${name} and end_at is null
+            order by start_at desc
+            limit 1
+         )
+        returning name, start_at, end_at
       `;
-      const { rows } = await pool.query(update, [name]);
 
-      if (rows.length === 0) {
-        return res.status(404).json({ error: 'Name not found. Check in first.' });
+      if (closed.length === 0) {
+        return res.status(400).json({ error: `${name} has no open session` });
       }
-      return res.status(200).json({ message: 'Checked out', record: rows[0] });
+
+      const { start_at, end_at } = closed[0];
+      const seconds = Math.max(0, Math.floor((new Date(end_at) - new Date(start_at)) / 1000));
+
+      // upsert into totals
+      await sql`
+        insert into totals (name, total_seconds)
+        values (${name}, ${seconds})
+        on conflict (name)
+        do update set total_seconds = totals.total_seconds + excluded.total_seconds
+      `;
+
+      return res.status(200).json({ ok: true, message: `${name} signed out (+${seconds}s)` });
     }
 
-    return res.status(400).json({ error: 'Unknown action (use "Sign In" or "Sign Out")' });
-  } catch (e) {
-    if (String(e).includes('relation "totals" does not exist')) {
-      return res.status(400).json({
-        error: 'Table "totals" not found. Run the migration SQL shown in /api/migrate (see below).',
-      });
-    }
-    return res.status(500).json({ error: String(e) });
+    return res.status(400).json({ error: 'Unknown action' });
+  } catch (err) {
+    console.error('attendance error', err);
+    return res.status(500).json({ ok: false, error: String(err?.message || err) });
   }
-};
+}

@@ -1,20 +1,28 @@
-// api/totals.js
-const { pool } = require('./_db');
+import sql from './_db.js';
 
-module.exports = async (req, res) => {
+function fmt(seconds) {
+  const s = Number(seconds) || 0;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const r = s % 60;
+  return `${h}h ${m}m ${r}s`;
+}
+
+export default async function handler(req, res) {
   try {
-    const q = `SELECT name, total_minutes, is_checked_in, last_checkin
-               FROM totals
-               ORDER BY name`;
-    const { rows } = await pool.query(q);
-    res.status(200).json(rows);
-  } catch (e) {
-    // If the table doesn't exist yet, surface a helpful message
-    if (String(e).includes('relation "totals" does not exist')) {
-      return res.status(400).json({
-        error: 'Table "totals" not found. Run the migration SQL shown in /api/migrate (see below).',
-      });
-    }
-    res.status(500).json({ error: String(e) });
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') return res.status(204).end();
+
+    const rows = await sql`select name, total_seconds from totals order by total_seconds desc, name asc`;
+    return res.status(200).json(rows.map(r => ({
+      name: r.name,
+      total_seconds: Number(r.total_seconds),
+      human: fmt(r.total_seconds),
+    })));
+  } catch (err) {
+    console.error('totals error', err);
+    return res.status(500).json({ ok: false, error: String(err?.message || err) });
   }
-};
+}

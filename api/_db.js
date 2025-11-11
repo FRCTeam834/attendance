@@ -1,13 +1,8 @@
-// api/_db.js
-const { Pool } = require('pg');
+import { neon } from '@neondatabase/serverless';
 
 if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL is not defined');
+  throw new Error('Missing DATABASE_URL env var');
 }
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-});
-
-module.exports = { pool };
+const sql = neon(process.env.DATABASE_URL);
+export default sql;
