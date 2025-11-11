@@ -1,3 +1,8 @@
-﻿export default function handler(req, res) {
-  res.status(200).json({ ok: true, time: new Date().toISOString() });
-}
+// GET /api/health
+module.exports = async (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).send(JSON.stringify({
+    ok: true,
+    time: new Date().toISOString()
+  }));
+};
