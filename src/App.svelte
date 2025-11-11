@@ -116,74 +116,74 @@
   <img
     src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png"
     alt="Flower image"
-    style="width: 125px; height: auto; position: absolute; top: 150px; left: 450px;"
+    style="width: 125px; height: auto; position: absolute; top: 150px; left: 350px;"
   />
 </a>
 
 <img
   src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png"
   alt="Flower Image"
-  style="width: 115px; height: auto; position: absolute; top: 550px; left: 350px;"
+  style="width: 115px; height: auto; position: absolute; top: 550px; left: 250px;"
 />
 
 <img
   src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png"
   alt="Flower Image"
-  style="width: 150px; height: auto; position: absolute; top: 625px; left: 430px; transform: rotate(45deg);"
+  style="width: 150px; height: auto; position: absolute; top: 625px; left: 330px; transform: rotate(45deg);"
 />
 
 <img
   src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png"
   alt="Flower Image"
-  style="width: 75px; height: auto; position: absolute; top: 650px; left: 1150px;"
+  style="width: 75px; height: auto; position: absolute; top: 650px; left: 1050px;"
 />
 
 <img
   src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png"
   alt="Flower Image"
-  style="width: 75px; height: auto; position: absolute; top: 650px; left: 1150px;"
+  style="width: 75px; height: auto; position: absolute; top: 650px; left: 1050px;"
 />
 
 <img
   src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png"
   alt="Flower Image"
-  style="width: 75px; height: auto; position: absolute; top: 275px; left: 1150px;"
+  style="width: 75px; height: auto; position: absolute; top: 275px; left: 1050px;"
 />
 
 <img
   src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png"
   alt="Flower Image"
-  style="width: 100px; height: auto; position: absolute; top: 175px; left: 1200px; transform: rotate(15deg);"
+  style="width: 100px; height: auto; position: absolute; top: 175px; left: 1100px; transform: rotate(15deg);"
 />
 
 <img
   src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png"
   alt="Flower Image"
-  style="width: 150px; height: auto; position: absolute; top: 250px; left: 1250px;"
+  style="width: 150px; height: auto; position: absolute; top: 250px; left: 1150px;"
 />
 
 <img
   src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png"
   alt="Flower Image"
-  style="width: 250px; height: auto; position: absolute; top: 350px; left: 1100px; transform: rotate(150deg)"
+  style="width: 250px; height: auto; position: absolute; top: 350px; left: 1000px; transform: rotate(150deg)"
 />
 
 <img
   src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png"
   alt="Flower Image"
-  style="width: 250px; height: auto; position: absolute; top: 125px; left: 975px; transform: rotate(270deg)"
+  style="width: 250px; height: auto; position: absolute; top: 125px; left: 875px; transform: rotate(270deg)"
 />
 
 <img
   src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png"
   alt="Flower Image"
-  style="width: 250px; height: auto; position: absolute; top: 400px; left: 300px; transform: rotate(350deg)"
+  style="width: 250px; height: auto; position: absolute; top: 400px; left: 200px; transform: rotate(350deg)"
 />
 
 <img
   src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png"
   alt="Flower Image"
-  style="width: 250px; height: auto; position: absolute; top: 600px; left: 550px; transform: rotate(60deg)"
+  style="width: 250px; height: auto; position: absolute; top: 600px; left: 450px; transform: rotate(60deg)"
 />
 
 <!-- ============== CENTERED UI LAYER (strong inline centering) ============== -->
