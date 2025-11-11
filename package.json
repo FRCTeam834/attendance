@@ -26,6 +26,10 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
     "@tailwindcss/cli": "^4.1.13",
+<<<<<<< HEAD
+=======
+    "pg": "^8.16.3",
+>>>>>>> 423e1d4 (Setup backend for Vercel (/api, vercel.json, .env.example))
     "sirv-cli": "^2.0.0"
   }
 }
