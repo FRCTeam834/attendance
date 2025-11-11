@@ -1,4 +1,11 @@
 {
   "version": 2,
-  "builds": [{ "src": "api/**/*.js", "use": "@vercel/node" }]
+  "devCommand": "npm run start",
+  "functions": {
+    "api/**/*.js": { "runtime": "nodejs18.x" }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "http://localhost:5173/$1" }
+  ]
 }

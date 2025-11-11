@@ -1,16 +1,17 @@
-const { sql } = require("./_db");
+// api/migrate.js
+const db = require("./_db");
 
-module.exports = async (_req, res) => {
+module.exports = async (req, res) => {
   try {
-    await sql`
+    await db.query(`
       CREATE TABLE IF NOT EXISTS attendance_totals (
         name TEXT PRIMARY KEY,
-        total_seconds BIGINT NOT NULL DEFAULT 0,
-        last_checkin TIMESTAMPTZ
+        total_minutes INTEGER NOT NULL DEFAULT 0,
+        last_checkin TIMESTAMPTZ NULL
       );
-    `;
-    res.status(200).json({ ok: true, created: true });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
+    `);
+    res.status(200).json({ ok: true, message: "Table ready: attendance_totals" });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
   }
 };

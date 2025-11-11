@@ -1,71 +1,107 @@
-// /api/attendance.js
-const { query } = require("./_db");
+// api/attendance.js
+const db = require("./_db");
 
-// Safely read the body in @vercel/node (req.body may be undefined)
-function readBody(req) {
-  return new Promise((resolve, reject) => {
-    if (req.body) return resolve(req.body);
-    let data = "";
-    req.on("data", (chunk) => (data += chunk));
-    req.on("end", () => {
-      try {
-        if (!data) return resolve({});
-        const ct = String(req.headers["content-type"] || "").toLowerCase();
-        if (ct.includes("application/json")) return resolve(JSON.parse(data));
-        resolve(data);
-      } catch (e) {
-        reject(e);
-      }
-    });
-    req.on("error", reject);
-  });
+// Helper to ensure table exists on first hit (saves you from calling /api/migrate manually)
+async function ensureTable() {
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS attendance_totals (
+      name TEXT PRIMARY KEY,
+      total_minutes INTEGER NOT NULL DEFAULT 0,
+      last_checkin TIMESTAMPTZ NULL
+    );
+  `);
 }
 
 module.exports = async (req, res) => {
   try {
+    await ensureTable();
+
     if (req.method === "GET") {
-      const { rows } = await query(
-        `SELECT id, name, action, occurred_at
-           FROM attendance
-           ORDER BY occurred_at DESC
-           LIMIT 500`
+      const rows = await db.query(
+        `SELECT name, total_minutes, (last_checkin IS NOT NULL) AS is_logged_in
+           FROM attendance_totals
+           ORDER BY name ASC;`
       );
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify(rows));
-      return;
+      return res.status(200).json(rows.rows);
     }
 
     if (req.method === "POST") {
-      const body = await readBody(req);
-      const { name, action } = body || {};
+      const { name, action } = req.body || {};
       if (!name || !action) {
-        res.statusCode = 400;
-        res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify({ error: "Both 'name' and 'action' are required." }));
-        return;
+        return res.status(400).json({ error: "Missing name or action" });
       }
+      const n = String(name).trim();
 
-      const { rows } = await query(
-        `INSERT INTO attendance (name, action, occurred_at)
-         VALUES ($1, $2, NOW())
-         RETURNING id, name, action, occurred_at`,
-        [name, action]
+      // Make sure the row exists
+      await db.query(
+        `INSERT INTO attendance_totals(name) VALUES ($1)
+         ON CONFLICT (name) DO NOTHING;`,
+        [n]
       );
 
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ message: "Attendance recorded.", record: rows[0] }));
-      return;
+      if (action === "Sign In") {
+        // Only set last_checkin if not already signed in
+        const result = await db.query(
+          `UPDATE attendance_totals
+              SET last_checkin = COALESCE(last_checkin, NOW())
+            WHERE name = $1
+            RETURNING name, total_minutes, last_checkin;`,
+          [n]
+        );
+
+        const row = result.rows[0];
+        const already = row && row.last_checkin && new Date(row.last_checkin) < new Date();
+        return res.status(200).json({
+          ok: true,
+          message: already ? `${n} is now signed in.` : `${n} is now signed in.`,
+        });
+      }
+
+      if (action === "Sign Out") {
+        // Need a last_checkin
+        const current = await db.query(
+          `SELECT name, total_minutes, last_checkin
+             FROM attendance_totals
+            WHERE name = $1;`,
+          [n]
+        );
+
+        if (current.rowCount === 0) {
+          return res.status(400).json({ error: "No record for this user. Please sign in first." });
+        }
+        const row = current.rows[0];
+        if (!row.last_checkin) {
+          return res.status(400).json({ error: "User is not currently signed in." });
+        }
+
+        // Compute minutes between now and last_checkin
+        const diff = await db.query(
+          `SELECT EXTRACT(EPOCH FROM (NOW() - $1)) AS seconds;`,
+          [row.last_checkin]
+        );
+        const minutes = Math.max(0, Math.round(diff.rows[0].seconds / 60));
+
+        const updated = await db.query(
+          `UPDATE attendance_totals
+              SET total_minutes = total_minutes + $2,
+                  last_checkin = NULL
+            WHERE name = $1
+            RETURNING total_minutes;`,
+          [n, minutes]
+        );
+
+        return res.status(200).json({
+          ok: true,
+          message: `${n} signed out (+${minutes} min). Total: ${updated.rows[0].total_minutes} min.`,
+        });
+      }
+
+      return res.status(400).json({ error: "Unknown action. Use 'Sign In' or 'Sign Out'." });
     }
 
     res.setHeader("Allow", "GET, POST");
-    res.statusCode = 405;
-    res.end("Method Not Allowed");
-  } catch (err) {
-    console.error("API error:", err);
-    res.statusCode = 500;
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: "Server error." }));
+    return res.status(405).json({ error: "Method Not Allowed" });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
 };

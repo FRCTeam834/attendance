@@ -1,0 +1,7 @@
+@'
+# ignore node modules and build outputs
+node_modules
+.vercel
+public/build
+# DO NOT ignore the api folder
+'@ | Set-Content -Encoding UTF8 .vercelignore

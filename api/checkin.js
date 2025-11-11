@@ -1,26 +1,32 @@
 // api/checkin.js
-const { sql, ensure } = require('./_db');
+const db = require("./_db");
 
 module.exports = async (req, res) => {
   try {
-    await ensure();
+    const { name } = (req.method === "POST" ? req.body : req.query) || {};
+    if (!name || !name.trim()) return res.status(400).json({ ok: false, error: "Missing name" });
 
-    const name = (req.query.name || req.body?.name || '').trim();
-    if (!name) return res.status(400).json({ ok: false, error: 'Missing name' });
+    const n = name.trim();
 
-    // Set last_checkin only if not already checked in
-    const now = new Date().toISOString();
-    const row = await sql/* sql */`
-      INSERT INTO totals (name, total_minutes, last_checkin)
-      VALUES (${name}, 0, ${now})
-      ON CONFLICT (name) DO UPDATE
-      SET last_checkin = COALESCE(totals.last_checkin, EXCLUDED.last_checkin)
-      RETURNING name, total_minutes, last_checkin;
-    `;
+    // Ensure row exists
+    await db.query(
+      `INSERT INTO attendance_totals(name) VALUES ($1)
+       ON CONFLICT (name) DO NOTHING;`,
+      [n]
+    );
 
-    res.json({ ok: true, ...row[0] });
+    // Only set last_checkin if it is currently NULL (prevent double-login)
+    const result = await db.query(
+      `UPDATE attendance_totals
+         SET last_checkin = COALESCE(last_checkin, NOW())
+       WHERE name = $1
+       RETURNING name, total_minutes, last_checkin;`,
+      [n]
+    );
+
+    const row = result.rows[0];
+    res.status(200).json({ ok: true, name: row.name, total_minutes: row.total_minutes, last_checkin: row.last_checkin });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ ok: false, error: String(e) });
+    res.status(500).json({ ok: false, error: e.message });
   }
 };

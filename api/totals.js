@@ -1,12 +1,15 @@
 // api/totals.js
-const { sql, ensure } = require('./_db');
+const db = require("./_db");
 
-module.exports = async (_req, res) => {
+module.exports = async (req, res) => {
   try {
-    await ensure();
-    const rows = await sql/* sql */`SELECT name, total_minutes FROM totals ORDER BY name;`;
-    res.json({ ok: true, totals: rows });
+    const result = await db.query(
+      `SELECT name, total_minutes, (last_checkin IS NOT NULL) AS is_logged_in
+         FROM attendance_totals
+         ORDER BY name ASC;`
+    );
+    res.status(200).json({ ok: true, totals: result.rows });
   } catch (e) {
-    console.error(e);
-    res.status
-  }}
+    res.status(500).json({ ok: false, error: e.message });
+  }
+};

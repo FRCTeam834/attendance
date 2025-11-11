@@ -1,17 +1,16 @@
 // api/_db.js
-const { neon } = require('@neondatabase/serverless');
+const { Pool } = require("pg");
 
-const sql = neon(process.env.DATABASE_URL);
-
-// Ensure table exists (one table only)
-async function ensure() {
-  await sql/* sql */`
-    CREATE TABLE IF NOT EXISTS totals (
-      name TEXT PRIMARY KEY,
-      total_minutes INTEGER NOT NULL DEFAULT 0,
-      last_checkin TIMESTAMPTZ
-    );
-  `;
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("Missing DATABASE_URL in environment");
 }
 
-module.exports = { sql, ensure };
+const pool = new Pool({
+  connectionString,
+  ssl: { rejectUnauthorized: false },
+});
+
+module.exports = {
+  query: (text, params) => pool.query(text, params),
+};
