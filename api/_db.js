@@ -1,16 +1,13 @@
 // api/_db.js
-const { Pool } = require("pg");
+const { Pool } = require('pg');
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("Missing DATABASE_URL in environment");
+if (!process.env.DATABASE_URL) {
+  console.error('DATABASE_URL is not defined');
 }
 
 const pool = new Pool({
-  connectionString,
+  connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
 });
 
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-};
+module.exports = { pool };
