@@ -1,29 +1,35 @@
-import sql from './_db.js';
+// api/migrate.js
+import 'dotenv/config';
+import { neon } from '@neondatabase/serverless';
 
-export default async function handler(req, res) {
+const sql = neon(process.env.DATABASE_URL);
+const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { 'content-type': 'application/json' } });
+
+export default async function handler() {
   try {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    if (req.method === 'OPTIONS') return res.status(204).end();
+    // One statement per call — do not chain with semicolons
+    await sql`
+      CREATE TABLE IF NOT EXISTS sessions (
+        id         serial PRIMARY KEY,
+        name       text   NOT NULL,
+        start_at   timestamptz NOT NULL DEFAULT now(),
+        end_at     timestamptz
+      )
+    `;
 
     await sql`
-      create table if not exists sessions (
-        id bigserial primary key,
-        name text not null,
-        start_at timestamptz not null default now(),
-        end_at timestamptz
-      );
+      CREATE TABLE IF NOT EXISTS totals (
+        name          text PRIMARY KEY,
+        total_seconds integer NOT NULL DEFAULT 0
+      )
     `;
-    await sql`
-      create table if not exists totals (
-        name text primary key,
-        total_seconds bigint not null default 0
-      );
-    `;
-    return res.status(200).json({ ok: true, message: 'migrations complete' });
-  } catch (err) {
-    console.error('migrate error', err);
-    return res.status(500).json({ ok: false, error: String(err?.message || err) });
+
+    // Optional helpful index
+    await sql`CREATE INDEX IF NOT EXISTS sessions_open_idx ON sessions (name) WHERE end_at IS NULL`;
+
+    return json({ ok: true, message: 'migrations applied' });
+  } catch (e) {
+    console.error('migrate error', e);
+    return json({ ok: false, error: String(e?.message || e) }, 500);
   }
 }
