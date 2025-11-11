@@ -1,14 +1,32 @@
-// Simple Postgres helper (Node on Vercel)
-const { Pool } = require('pg');
+const { neon } = require('@neondatabase/serverless');
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL?.includes('localhost')
-    ? false
-    : { rejectUnauthorized: false }
-});
+let _sql;
+function sql() {
+  if (!_sql) {
+    const url = process.env.DATABASE_URL;
+    if (!url) throw new Error('DATABASE_URL is missing');
+    _sql = neon(url);
+  }
+  return _sql;
+}
 
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-  end: () => pool.end()
-};
+let _schemaReady = false;
+async function ensureSchema() {
+  if (_schemaReady) return;
+  const db = sql();
+
+  // One-table design with running totals + current session info
+  await db/* sql */`
+    create table if not exists attendance_totals (
+      id serial primary key,
+      name text not null unique,
+      total_seconds bigint not null default 0,
+      is_checked_in boolean not null default false,
+      last_checkin timestamptz
+    );
+  `;
+
+  _schemaReady = true;
+}
+
+module.exports = { sql, ensureSchema };
