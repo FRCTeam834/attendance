@@ -1,35 +1,33 @@
-// api/migrate.js
-import 'dotenv/config';
-import { neon } from '@neondatabase/serverless';
+import { sql } from './_db.js';
 
-const sql = neon(process.env.DATABASE_URL);
-const json = (b, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { 'content-type': 'application/json' } });
-
-export default async function handler() {
+export default async function handler(req, res) {
   try {
-    // One statement per call — do not chain with semicolons
+    if (req.method !== 'POST' && req.method !== 'GET') {
+      return res.status(405).json({ ok: false, error: 'Method Not Allowed' });
+    }
+
+    // One statement per call (Neon-safe)
     await sql`
       CREATE TABLE IF NOT EXISTS sessions (
-        id         serial PRIMARY KEY,
-        name       text   NOT NULL,
-        start_at   timestamptz NOT NULL DEFAULT now(),
-        end_at     timestamptz
+        id       BIGSERIAL PRIMARY KEY,
+        name     TEXT NOT NULL,
+        start_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        end_at   TIMESTAMPTZ
       )
     `;
 
     await sql`
       CREATE TABLE IF NOT EXISTS totals (
-        name          text PRIMARY KEY,
-        total_seconds integer NOT NULL DEFAULT 0
+        name          TEXT PRIMARY KEY,
+        total_seconds BIGINT NOT NULL DEFAULT 0
       )
     `;
 
-    // Optional helpful index
     await sql`CREATE INDEX IF NOT EXISTS sessions_open_idx ON sessions (name) WHERE end_at IS NULL`;
 
-    return json({ ok: true, message: 'migrations applied' });
+    res.status(200).json({ ok: true, message: 'migrations applied' });
   } catch (e) {
     console.error('migrate error', e);
-    return json({ ok: false, error: String(e?.message || e) }, 500);
+    res.status(500).json({ ok: false, error: String(e?.message || e) });
   }
 }

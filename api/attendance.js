@@ -1,57 +1,52 @@
-// api/attendance.js
-import 'dotenv/config';
-import { neon } from '@neondatabase/serverless';
-
-const sql = neon(process.env.DATABASE_URL);
-
-// Helper to send JSON
-const json = (body, status = 200) => new Response(JSON.stringify(body), {
-  status,
-  headers: { 'content-type': 'application/json' }
-});
+import { sql } from './_db.js';
 
 export default async function handler(req, res) {
   try {
-    const urlMethod = (req.method || 'GET').toUpperCase();
+    const method = (req.method || 'GET').toUpperCase();
 
-    if (urlMethod === 'GET') {
-      // Return current totals (single statement)
+    if (method === 'GET') {
       const rows = await sql`
         SELECT name, total_seconds
         FROM totals
         ORDER BY name
       `;
-      return json(rows);
+      return res.status(200).json(rows);
     }
 
-    if (urlMethod === 'POST') {
+    if (method === 'POST') {
       const { name, action } = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-      if (!name || !action) return json({ error: 'Missing name or action' }, 400);
+      if (!name || !action) return res.status(400).json({ error: 'Missing name or action' });
 
       if (action === 'Sign In') {
-        // Start a new session (single statement)
-        const r = await sql`
+        // Prevent double sign-in: only create a new session if there isn't an open one
+        const inserted = await sql`
+          WITH open AS (
+            SELECT id FROM sessions WHERE name = ${name} AND end_at IS NULL LIMIT 1
+          )
           INSERT INTO sessions (name, start_at)
-          VALUES (${name}, now())
+          SELECT ${name}, now()
+          WHERE NOT EXISTS (SELECT 1 FROM open)
           RETURNING id, name, start_at
         `;
-        return json({ message: `Signed in ${name}`, session: r[0] });
+        if (inserted.length === 0) {
+          return res.status(409).json({ error: 'Already signed in' });
+        }
+        return res.status(200).json({ message: `Signed in ${name}`, session: inserted[0] });
       }
 
       if (action === 'Sign Out') {
-        // Close the latest open session and upsert totals in ONE statement using CTEs
+        // Close latest open session and upsert totals in ONE statement
         const r = await sql`
           WITH closed AS (
             UPDATE sessions
-            SET end_at = now()
-            WHERE id = (
-              SELECT id
-              FROM sessions
-              WHERE name = ${name} AND end_at IS NULL
-              ORDER BY start_at DESC
-              LIMIT 1
-            )
-            RETURNING name, EXTRACT(EPOCH FROM (end_at - start_at))::int AS secs
+               SET end_at = now()
+             WHERE id = (
+               SELECT id FROM sessions
+                WHERE name = ${name} AND end_at IS NULL
+                ORDER BY start_at DESC
+                LIMIT 1
+             )
+             RETURNING name, EXTRACT(EPOCH FROM (end_at - start_at))::bigint AS secs
           ),
           upsert AS (
             INSERT INTO totals (name, total_seconds)
@@ -62,17 +57,16 @@ export default async function handler(req, res) {
           )
           SELECT * FROM upsert
         `;
-
-        if (!r.length) return json({ error: `No open session found for ${name}` }, 404);
-        return json({ message: `Signed out ${name}`, total: r[0] });
+        if (r.length === 0) return res.status(404).json({ error: `No open session for ${name}` });
+        return res.status(200).json({ message: `Signed out ${name}`, total: r[0] });
       }
 
-      return json({ error: 'Unknown action' }, 400);
+      return res.status(400).json({ error: 'Unknown action' });
     }
 
-    return json({ error: 'Method not allowed' }, 405);
+    return res.status(405).json({ error: 'Method not allowed' });
   } catch (err) {
     console.error('attendance error', err);
-    return json({ error: 'FUNCTION_INVOCATION_FAILED', detail: String(err?.message || err) }, 500);
+    return res.status(500).json({ error: 'FUNCTION_INVOCATION_FAILED', detail: String(err?.message || err) });
   }
 }

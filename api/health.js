@@ -1,16 +1,11 @@
-import sql from './_db.js';
+import { sql } from './_db.js';
 
 export default async function handler(req, res) {
   try {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    if (req.method === 'OPTIONS') return res.status(204).end();
-
-    const [{ now }] = await sql`select now()`;
-    return res.status(200).json({ ok: true, now });
-  } catch (err) {
-    console.error('health error', err);
-    return res.status(500).json({ ok: false, error: String(err?.message || err) });
+    const r = await sql`SELECT now() AS ts`;
+    res.status(200).json({ ok: true, now: r[0].ts });
+  } catch (e) {
+    console.error('health error', e);
+    res.status(500).json({ ok: false, error: String(e?.message || e) });
   }
 }

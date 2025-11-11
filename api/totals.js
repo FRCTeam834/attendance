@@ -1,25 +1,15 @@
-// api/totals.js
-import 'dotenv/config';
-import { neon } from '@neondatabase/serverless';
+import { sql } from './_db.js';
 
 export default async function handler(req, res) {
   try {
-    const sql = neon(process.env.DATABASE_URL);
-    const rows = await sql/*sql*/`
-      SELECT
-        name,
-        COALESCE(
-          SUM(duration_seconds),
-          SUM(EXTRACT(EPOCH FROM (checkout - checkin))::bigint)
-        ) AS total_seconds
-      FROM sessions
-      WHERE checkout IS NOT NULL
-      GROUP BY name
-      ORDER BY name;
+    const rows = await sql`
+      SELECT name, total_seconds
+      FROM totals
+      ORDER BY name
     `;
     res.status(200).json(rows);
-  } catch (err) {
-    console.error('totals error:', err);
+  } catch (e) {
+    console.error('totals error', e);
     res.status(500).json({ error: 'Failed to load totals' });
   }
 }

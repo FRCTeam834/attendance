@@ -1,42 +1,38 @@
-// api/checkout.js
-const db = require("./_db");
+import { sql } from './_db.js';
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   try {
-    const { name } = (req.method === "POST" ? req.body : req.query) || {};
-    if (!name || !name.trim()) return res.status(400).json({ ok: false, error: "Missing name" });
+    if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method Not Allowed' });
+    const { name } = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+    if (!name || !name.trim()) return res.status(400).json({ ok: false, error: 'Missing name' });
 
     const n = name.trim();
 
-    // Grab last_checkin and total
-    const current = await db.query(
-      `SELECT name, total_minutes, last_checkin FROM attendance_totals WHERE name = $1;`,
-      [n]
-    );
-    if (current.rowCount === 0) {
-      return res.status(400).json({ ok: false, error: "User has no record. Login first." });
-    }
+    const r = await sql`
+      WITH closed AS (
+        UPDATE sessions
+           SET end_at = now()
+         WHERE id = (
+           SELECT id FROM sessions
+            WHERE name = ${n} AND end_at IS NULL
+            ORDER BY start_at DESC
+            LIMIT 1
+         )
+         RETURNING name, EXTRACT(EPOCH FROM (end_at - start_at))::bigint AS secs
+      ),
+      upsert AS (
+        INSERT INTO totals (name, total_seconds)
+        SELECT name, secs FROM closed
+        ON CONFLICT (name)
+        DO UPDATE SET total_seconds = totals.total_seconds + EXCLUDED.total_seconds
+        RETURNING name, total_seconds
+      )
+      SELECT * FROM upsert
+    `;
 
-    const row = current.rows[0];
-    if (!row.last_checkin) {
-      return res.status(400).json({ ok: false, error: "User is not currently logged in." });
-    }
-
-    // Compute minutes between now and last_checkin
-    const diffRes = await db.query(`SELECT EXTRACT(EPOCH FROM (NOW() - $1)) AS seconds;`, [row.last_checkin]);
-    const minutes = Math.max(0, Math.round(diffRes.rows[0].seconds / 60));
-
-    const updated = await db.query(
-      `UPDATE attendance_totals
-          SET total_minutes = total_minutes + $2,
-              last_checkin = NULL
-        WHERE name = $1
-        RETURNING name, total_minutes;`,
-      [n, minutes]
-    );
-
-    res.status(200).json({ ok: true, name: updated.rows[0].name, added_minutes: minutes, total_minutes: updated.rows[0].total_minutes });
+    if (r.length === 0) return res.status(404).json({ ok: false, error: `No open session for ${n}` });
+    res.status(200).json({ ok: true, total: r[0] });
   } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
+    res.status(500).json({ ok: false, error: String(e?.message || e) });
   }
-};
+}
