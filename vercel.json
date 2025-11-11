@@ -1,5 +1,5 @@
 {
-  "devCommand": "npm run start -- --port 3000",
+  "devCommand": "npm run start -- --port 5173",
   "buildCommand": "npm run build",
   "framework": null,
   "functions": {
