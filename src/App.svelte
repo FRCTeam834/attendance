@@ -111,9 +111,10 @@
 </script>
 
 <style>
-  .center-wrapper {
-    text-align: center;
-  }
+  .center-wrapper { position: relative; }
+canvas { z-index: 10; position: relative; }
+img { z-index: 1; position: absolute; }
+
 
   canvas {
     border: 8px solid #ffffff;
