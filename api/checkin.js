@@ -1,31 +1,26 @@
-const { sql, ensureSchema } = require('./_db');
+// api/checkin.js
+const { sql, ensure } = require('./_db');
 
 module.exports = async (req, res) => {
   try {
-    await ensureSchema();
+    await ensure();
 
     const name = (req.query.name || req.body?.name || '').trim();
-    if (!name) {
-      res.status(400).json({ error: 'name is required' });
-      return;
-    }
+    if (!name) return res.status(400).json({ ok: false, error: 'Missing name' });
 
-    const db = sql();
-
-    // Create row if missing, but only set checked in if not already checked in
-    const rows = await db/* sql */`
-      insert into attendance_totals (name, is_checked_in, last_checkin)
-      values (${name}, true, now())
-      on conflict (name) do update
-        set
-          -- If already checked in, keep existing last_checkin; else start a new session
-          is_checked_in = true,
-          last_checkin = case when attendance_totals.is_checked_in then attendance_totals.last_checkin else now() end
-      returning name, total_seconds, is_checked_in, last_checkin;
+    // Set last_checkin only if not already checked in
+    const now = new Date().toISOString();
+    const row = await sql/* sql */`
+      INSERT INTO totals (name, total_minutes, last_checkin)
+      VALUES (${name}, 0, ${now})
+      ON CONFLICT (name) DO UPDATE
+      SET last_checkin = COALESCE(totals.last_checkin, EXCLUDED.last_checkin)
+      RETURNING name, total_minutes, last_checkin;
     `;
 
-    res.status(200).json({ ok: true, user: rows[0] });
+    res.json({ ok: true, ...row[0] });
   } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
+    console.error(e);
+    res.status(500).json({ ok: false, error: String(e) });
   }
 };

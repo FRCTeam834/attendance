@@ -1,10 +1,6 @@
-requirements.txt
-Pipfile
-Pipfile.lock
-poetry.lock
-pyproject.toml
-runtime.txt
-Procfile
-setup.py
-setup.cfg
-**/*.py
+.git
+node_modules
+.svelte-kit
+build
+dist
+.DS_Store

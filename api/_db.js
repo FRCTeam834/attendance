@@ -1,32 +1,17 @@
+// api/_db.js
 const { neon } = require('@neondatabase/serverless');
 
-let _sql;
-function sql() {
-  if (!_sql) {
-    const url = process.env.DATABASE_URL;
-    if (!url) throw new Error('DATABASE_URL is missing');
-    _sql = neon(url);
-  }
-  return _sql;
-}
+const sql = neon(process.env.DATABASE_URL);
 
-let _schemaReady = false;
-async function ensureSchema() {
-  if (_schemaReady) return;
-  const db = sql();
-
-  // One-table design with running totals + current session info
-  await db/* sql */`
-    create table if not exists attendance_totals (
-      id serial primary key,
-      name text not null unique,
-      total_seconds bigint not null default 0,
-      is_checked_in boolean not null default false,
-      last_checkin timestamptz
+// Ensure table exists (one table only)
+async function ensure() {
+  await sql/* sql */`
+    CREATE TABLE IF NOT EXISTS totals (
+      name TEXT PRIMARY KEY,
+      total_minutes INTEGER NOT NULL DEFAULT 0,
+      last_checkin TIMESTAMPTZ
     );
   `;
-
-  _schemaReady = true;
 }
 
-module.exports = { sql, ensureSchema };
+module.exports = { sql, ensure };
