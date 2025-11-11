@@ -26,6 +26,8 @@
       });
 
       const data = await res.json();
+      console.log(data);
+
       if (data.error) {
         alert(data.error);
       } else {
@@ -72,23 +74,28 @@
       x = e.offsetX;
       y = e.offsetY;
     }
+
     return { x, y };
   };
 
   const startDrawing = (e) => {
     e.preventDefault();
     isDrawing = true;
+
     const { x, y } = getPosition(e);
     [lastX, lastY] = [x, y];
   };
 
   const draw = (e) => {
     if (!isDrawing) return;
+
     const { x, y } = getPosition(e);
+
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
+
     [lastX, lastY] = [x, y];
   };
 
@@ -104,91 +111,110 @@
 </script>
 
 <style>
-  :global(body) {
-    position: relative;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Centered UI overlay that sits between the flowers */
-  .ui {
-    position: fixed;         /* keeps it centered regardless of scroll */
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    z-index: 50;             /* above the decorative images */
-    background: rgba(255, 255, 255, 0.85);
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.12);
-  }
-
-  .row {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-  }
-
-  select {
-    min-width: 220px;
+  .center-wrapper {
+    text-align: center;
   }
 
   canvas {
     border: 8px solid #ffffff;
     background-color: rgb(65, 105, 225);
     cursor: crosshair;
-    margin-top: 6px;
+    margin-top: 20px;
   }
 
-  /* keep your original absolute images behaving as before */
-  .deco {
-    position: absolute;
-    z-index: 10;  /* below UI overlay but above page background */
+  .form-container {
+    display: inline-block;
+    text-align: center;
+  }
+
+  select, button {
+    margin: 10px;
   }
 </style>
 
-<!-- YOUR DECORATIVE IMAGES (unchanged, just add class="deco") -->
 <a href="https://imgbb.com/">
-  <img
-    class="deco"
-    src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png"
+  <img 
+    src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
     alt="Flower image"
-    style="width: 125px; height: auto; top: 150px; left: 450px;"
-  />
+    style="width: 125px; height: auto; position: absolute; top: 150px; left: 450px;" />
 </a>
 
-<img class="deco" src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" alt="Flower"
-  style="width: 115px; height: auto; top: 550px; left: 350px;" />
-<img class="deco" src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" alt="Flower"
-  style="width: 150px; height: auto; top: 625px; left: 430px; transform: rotate(45deg);" />
-<img class="deco" src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" alt="Flower"
-  style="width: 75px; height: auto; top: 650px; left: 1150px;" />
-<img class="deco" src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" alt="Flower"
-  style="width: 75px; height: auto; top: 275px; left: 1150px;" />
-<img class="deco" src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" alt="Flower"
-  style="width: 100px; height: auto; top: 175px; left: 1200px; transform: rotate(15deg);" />
-<img class="deco" src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" alt="Flower"
-  style="width: 150px; height: auto; top: 250px; left: 1250px;" />
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 115px; height: auto; position: absolute; top: 550px; left: 350px;" 
+/>
 
-<img class="deco" src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" alt="Flower"
-  style="width: 250px; height: auto; top: 350px; left: 1100px; transform: rotate(150deg)" />
-<img class="deco" src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" alt="Flower"
-  style="width: 250px; height: auto; top: 125px; left: 975px; transform: rotate(270deg)" />
-<img class="deco" src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" alt="Flower"
-  style="width: 250px; height: auto; top: 400px; left: 300px; transform: rotate(350deg)" />
-<img class="deco" src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" alt="Flower"
-  style="width: 250px; height: auto; top: 600px; left: 550px; transform: rotate(60deg)" />
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 150px; height: auto; position: absolute; top: 625px; left: 430px; transform: rotate(45deg);" 
+/>
 
-<!-- CENTERED UI OVERLAY -->
-<div class="ui">
-  <div class="row">
-    <select bind:value={selectedName} required disabled={loading}>
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 75px; height: auto; position: absolute; top: 650px; left: 1150px;" 
+/>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 75px; height: auto; position: absolute; top: 650px; left: 1150px;" 
+/>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 75px; height: auto; position: absolute; top: 275px; left: 1150px;" 
+/>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 100px; height: auto; position: absolute; top: 175px; left: 1200px;transform: rotate(15deg);" 
+/>
+
+<img 
+  src="https://i.ibb.co/84sq5Ykm/Adobe-Express-file-1.png" 
+  alt="Flower Image"
+  style="width: 150px; height: auto; position: absolute; top: 250px; left: 1250px;" 
+/>
+
+<img 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
+  alt="Flower Image"
+  style="width: 250px; height: auto; position: absolute; top: 350px; left: 1100px;transform: rotate(150deg)" 
+/>
+
+<img 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
+  alt="Flower Image"
+  style="width: 250px; height: auto; position: absolute; top: 125px; left: 975px;transform: rotate(270deg)" 
+/>
+
+<img 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
+  alt="Flower Image"
+  style="width: 250px; height: auto; position: absolute; top: 400px; left: 300px;transform: rotate(350deg)" 
+/>
+
+<img 
+  src="https://i.ibb.co/nNKtLjTk/Adobe-Express-file-2.png" 
+  alt="Flower Image"
+  style="width: 250px; height: auto; position: absolute; top: 600px; left: 550px;transform: rotate(60deg)" 
+/>
+
+<div class="center-wrapper">
+  <form method="POST" class="form-container">
+    <br> <br> <br> <br>
+
+    <select 
+      bind:value={selectedName} 
+      class="select select-bordered w-full max-w-xs" 
+      required
+      disabled={loading}
+    >
       <option value="Select User">Select User</option>
       <option value="Dominic Veneziale">Dominic Veneziale</option>
       <option value="Julia Meaney">Julia Meaney</option>
@@ -206,6 +232,7 @@
       <option value="Yusef Seyed">Yusef Seyed</option>
       <option value="John Coult">John Coult</option>
       <option value="Mark Hernandez Guerra">Mark Hernandez Guerra</option>
+      <option value="John Coult">John Coult</option>
       <option value="Dylan Braverman">Dylan Braverman</option>
       <option value="Jackson Burmeister">Jackson Burmeister</option>
       <option value="Karsten Immerzeal">Karsten Immerzeal</option>
@@ -244,33 +271,42 @@
       <option value="Akshaya Guduru">Akshaya Guduru</option>
       <option value="Anand Kunnath">Anand Kunnath</option>
     </select>
+    <br>
 
-    <button type="button" class="btn py-2 px-4 text-sm"
+    <button 
+      type="button" 
+      class="btn py-2 px-4 text-sm" 
       on:click={() => submitAttendance("Sign In")}
-      disabled={loading}>
+      disabled={loading}
+    >
       {loading ? "Processing..." : "Sign In"}
     </button>
 
-    <button type="button" class="btn py-2 px-4 text-sm"
+    <button 
+      type="button" 
+      class="btn py-2 px-4 text-sm" 
       on:click={() => submitAttendance("Sign Out")}
-      disabled={loading}>
+      disabled={loading}
+    >
       {loading ? "Processing..." : "Sign Out"}
     </button>
-  </div>
 
-  <canvas
-    bind:this={canvas}
-    width="600"
-    height="300"
-    on:mousedown={startDrawing}
-    on:mousemove={draw}
-    on:mouseup={stopDrawing}
-    on:mouseleave={stopDrawing}
-    on:touchstart={startDrawing}
-    on:touchmove={draw}
-    on:touchend={stopDrawing}
-    on:touchcancel={stopDrawing}
-  ></canvas>
+    <br> <br> <br>
 
-  <button type="button" class="btn" on:click={clearCanvas}>Clear</button>
+    <canvas
+      bind:this={canvas}
+      width="600"
+      height="300"
+      on:mousedown={startDrawing}
+      on:mousemove={draw}
+      on:mouseup={stopDrawing}
+      on:mouseleave={stopDrawing}
+      on:touchstart={startDrawing}
+      on:touchmove={draw}
+      on:touchend={stopDrawing}
+      on:touchcancel={stopDrawing}
+    ></canvas>
+    <br>
+    <button type="button" class="btn" on:click={clearCanvas}>Clear</button>
+  </form>
 </div>
