@@ -1,17 +1,14 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>SparTechs Attendance</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>body{font-family:system-ui,Segoe UI,Arial;margin:2rem}code{background:#eee;padding:.2rem .4rem;border-radius:.25rem}</style>
+    <!-- Optional if you're generating Tailwind to public/tailwind.css -->
+    <link rel="stylesheet" href="/tailwind.css" />
   </head>
   <body>
-    <h1>It works 🎉</h1>
-    <p>Backend test endpoints:</p>
-    <ul>
-      <li><a href="/api/health">/api/health</a></li>
-      <li><code>POST /api/attendance</code> with JSON: <code>{"team_number":"834","name":"Alex","status":"present"}</code></li>
-    </ul>
+    <!-- Svelte mounts into <body> via src/main.js -->
+    <script defer src="/build/bundle.js"></script>
   </body>
 </html>

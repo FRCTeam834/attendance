@@ -1,10 +1,5 @@
 {
-  "devCommand": "npm run start -- --port 5173",
-  "buildCommand": "npm run build",
   "framework": null,
-  "functions": {
-    "api/**/*.[jt]s": {
-      "runtime": "nodejs20.x"
-    }
-  }
+  "buildCommand": "npm run build",
+  "devCommand": "npm run start -- --port %PORT%"
 }

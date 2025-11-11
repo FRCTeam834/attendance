@@ -1,4 +1,4 @@
 // api/health.js
-module.exports = (req, res) => {
+export default function handler(req, res) {
   res.status(200).json({ ok: true });
-};
+}
