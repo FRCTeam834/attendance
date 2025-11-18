@@ -186,7 +186,7 @@
   style="width: 250px; height: auto; position: absolute; top: 500px; left: 450px; transform: rotate(60deg)"
 />
 
-<!-- ============== CENTERED UI LAYER (strong inline centering) ============== -->
+
 <div style="position:fixed; inset:0; display:grid; place-items:center; z-index:50;">
   <div style="display:flex; flex-direction:column; align-items:center; gap:12px;
             background:transparent; padding:0; border-radius:0; box-shadow:none;">
@@ -288,7 +288,7 @@
 </div>
 
 <style>
-  /* keep only your canvas defaults (images are inline-styled already) */
+ 
   canvas {
     /* these are overridden by inline styles but left for clarity */
     border: 8px solid #ffffff;

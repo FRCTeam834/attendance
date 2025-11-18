@@ -1,99 +1,99 @@
-<script>
-  import { onMount } from 'svelte';
-  import { getAttendance, createAttendance, health } from '../lib/api.js';
+// api/attendance.js
+import { sql } from './_db.js';
 
-  let rows = [];
-  let loading = false;
-  let error = '';
+const MAX_SESSION_SECONDS = 3 * 60 * 60; // 10,800 (3 hours)
 
-  // Form fields
-  let teamNumber = 834;
-  let student = '';
-  let status = 'present';
-
-  async function load() {
-    loading = true;
-    error = '';
-    try {
-      // Optional health check to prove API is reachable
-      await health();
-      rows = await getAttendance(20);
-    } catch (e) {
-      error = e.message || String(e);
-    } finally {
-      loading = false;
-    }
+function parseBody(req) {
+  if (typeof req.body === 'string') {
+    try { return JSON.parse(req.body || '{}'); } catch { return {}; }
   }
+  return req.body || {};
+}
 
-  async function submit(e) {
-    e.preventDefault();
-    error = '';
-    try {
-      await createAttendance({
-        teamNumber: Number(teamNumber),
-        student: student.trim(),
-        status,
-        notedAt: new Date().toISOString()
+export default async function handler(req, res) {
+  try {
+    const method = (req.method || 'GET').toUpperCase();
+
+    // GET: return totals
+    if (method === 'GET') {
+      const rows = await sql`SELECT name, total_seconds FROM totals ORDER BY name`;
+      res.status(200).json(rows);
+      return;
+    }
+
+    if (method !== 'POST') {
+      res.status(405).json({ error: 'Method Not Allowed' });
+      return;
+    }
+
+    const { name, action } = parseBody(req);
+    if (!name || !action) {
+      res.status(400).json({ error: 'Missing name or action' });
+      return;
+    }
+
+    // SIGN IN: start a session if none is open
+    if (action === 'Sign In') {
+      const open = await sql`SELECT 1 FROM sessions WHERE name = ${name} AND end_at IS NULL LIMIT 1`;
+      if (open.length) {
+        res.status(409).json({ error: 'Already signed in' });
+        return;
+      }
+      const r = await sql`
+        INSERT INTO sessions (name, start_at, end_at)
+        VALUES (${name}, now(), NULL)
+        RETURNING id, name, start_at
+      `;
+      res.status(200).json({ message: `Signed in ${name}`, session: r[0] });
+      return;
+    }
+
+    // SIGN OUT: close latest open session and add (capped) time to totals
+    if (action === 'Sign Out') {
+      const r = await sql`
+        UPDATE sessions
+           SET end_at = now()
+         WHERE id = (
+           SELECT id FROM sessions
+            WHERE name = ${name} AND end_at IS NULL
+            ORDER BY start_at DESC
+            LIMIT 1
+         )
+         RETURNING EXTRACT(EPOCH FROM (end_at - start_at))::bigint AS secs
+      `;
+      if (!r.length) {
+        res.status(404).json({ error: `No open session for ${name}` });
+        return;
+      }
+
+      const rawSeconds = Number(r[0].secs || 0);
+      const appliedSeconds = Math.min(Math.max(rawSeconds, 0), MAX_SESSION_SECONDS);
+
+      await sql`INSERT INTO totals (name) VALUES (${name}) ON CONFLICT (name) DO NOTHING`;
+      const up = await sql`
+        UPDATE totals
+           SET total_seconds = total_seconds + ${appliedSeconds}
+         WHERE name = ${name}
+         RETURNING name, total_seconds
+      `;
+
+      res.status(200).json({
+        message: `Signed out ${name}`,
+        added_seconds: appliedSeconds,
+        original_session_seconds: rawSeconds,
+        capped: appliedSeconds !== rawSeconds,
+        total: up[0]
       });
-      await load(); // refresh list
-      student = '';
-      status = 'present';
-    } catch (e) {
-      error = e.message || String(e);
+      return;
     }
+
+    res.status(400).json({ error: 'Unknown action' });
+  } catch (e) {
+    if (e && e.code === '23505') {
+      res.status(409).json({ error: 'Already signed in (unique index)' });
+      return;
+    }
+    console.error('attendance error', e);
+    res.status(500).json({ error: 'FUNCTION_INVOCATION_FAILED', detail: String(e?.message || e) });
   }
-
-  onMount(load);
-</script>
-
-<style>
-  .card { border: 1px solid var(--border, #ddd); border-radius: 12px; padding: 1rem; }
-  .row { display: grid; grid-template-columns: 100px 1fr 120px 240px; gap: .5rem; }
-  .muted { color: #666; font-size: .9rem; }
-  .list { display: grid; gap: .5rem; margin-top: 1rem; }
-  form { display: grid; gap: .5rem; margin-bottom: 1rem; }
-  input, select, button { padding: .5rem .65rem; border-radius: 8px; border: 1px solid #ccc; }
-  button { cursor: pointer; }
-  .err { color: #b00020; white-space: pre-wrap; }
-</style>
-
-<div class="card">
-  <h2>Attendance</h2>
-  <p class="muted">Backed by <code>/api/attendance</code> (relative path, no localhost).</p>
-
-  {#if error}
-    <p class="err">⚠️ {error}</p>
-  {/if}
-
-  <form on:submit={submit}>
-    <div class="row">
-      <input type="number" bind:value={teamNumber} min="1" placeholder="Team #" />
-      <input type="text" bind:value={student} placeholder="Student name" required />
-      <select bind:value={status}>
-        <option value="present">present</option>
-        <option value="absent">absent</option>
-        <option value="late">late</option>
-      </select>
-      <button type="submit">Add</button>
-    </div>
-  </form>
-
-  <button on:click={load} disabled={loading}>{loading ? 'Loading…' : 'Refresh'}</button>
-
-  <div class="list">
-    <div class="row" style="font-weight:600">
-      <div>Team</div><div>Student</div><div>Status</div><div>Noted At</div>
-    </div>
-    {#each rows as r}
-      <div class="row">
-        <div>{r.team_number ?? r.teamNumber}</div>
-        <div>{r.student}</div>
-        <div>{r.status}</div>
-        <div>{new Date(r.noted_at ?? r.notedAt).toLocaleString()}</div>
-      </div>
-    {/each}
-    {#if rows.length === 0}
-      <p class="muted">No records yet.</p>
-    {/if}
-  </div>
-</div>
+}
