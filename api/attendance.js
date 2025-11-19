@@ -1,6 +1,6 @@
 import { sql } from './_db.js';
 
-const CAP_SECONDS = 3 * 60 * 60; // 3 hours
+const CAP_SECONDS = 2 * 60 * 60; 
 
 function parseBody(req) {
   if (typeof req.body === 'string') {
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
       const appliedSeconds = Math.min(Math.max(rawSeconds, 0), CAP_SECONDS);
       const capped = appliedSeconds !== rawSeconds;
 
-      // Ensure totals row exists, then add the (possibly capped) seconds
+     
       await sql/*sql*/`INSERT INTO totals (name) VALUES (${name}) ON CONFLICT (name) DO NOTHING`;
       const up = await sql/*sql*/`
         UPDATE totals
