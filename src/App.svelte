@@ -226,7 +226,7 @@
         <option value="Geo Jung">Geo Jung</option>
         <option value="Grace Russell">Grace Russell</option>
         <option value="Grant Hufgard">Grant Hufgard</option>
-        <option value="Isabella O.A.">Isabella O.A.</option>
+        <option value="Isabella Ortiz Abreu">Isabella O.A.</option>
         <option value="Jake Tsyvine">Jake Tsyvine</option>
         <option value="Jayee Lin">Jayee Lin</option>
         <option value="Joey Kholer">Joey Kholer</option>
