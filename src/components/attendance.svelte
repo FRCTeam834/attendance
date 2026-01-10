@@ -1,7 +1,7 @@
 // api/attendance.js
 import { sql } from './_db.js';
 
-const MAX_SESSION_SECONDS = 3 * 60 * 60; // 10,800 (3 hours)
+const MAX_SESSION_SECONDS = 7 * 60 * 60; // 10,800 (3 hours)
 
 function parseBody(req) {
   if (typeof req.body === 'string') {
