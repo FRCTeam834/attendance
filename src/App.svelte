@@ -209,7 +209,6 @@
         <option value="Yusef Seyed">Yusef Seyed</option>
         <option value="John Coult">John Coult</option>
         <option value="Mark Hernandez Guerra">Mark Hernandez Guerra</option>
-        <option value="John Coult">John Coult</option>
         <option value="Dylan Braverman">Dylan Braverman</option>
         <option value="Jackson Burmeister">Jackson Burmeister</option>
         <option value="Karsten Immerzeal">Karsten Immerzeal</option>
@@ -230,7 +229,6 @@
         <option value="Jake Tsyvine">Jake Tsyvine</option>
         <option value="Jayee Lin">Jayee Lin</option>
         <option value="Joey Kholer">Joey Kholer</option>
-        <option value="John Cult">John Cult</option>
         <option value="Karsten Immerzeel">Karsten Immerzeel</option>
         <option value="Manas Pol">Manas Pol</option>
         <option value="Matthew Ryan">Matthew Ryan</option>
@@ -247,6 +245,7 @@
         <option value="Yusef Syed">Yusef Syed</option>
         <option value="Akshaya Guduru">Akshaya Guduru</option>
         <option value="Anand Kunnath">Anand Kunnath</option>
+        <option value="Liam Karlson">Liam Karlson</option>
       </select>
 
       <button
