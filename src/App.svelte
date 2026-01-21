@@ -234,7 +234,7 @@
         <option value="Matthew Ryan">Matthew Ryan</option>
         <option value="Myles Bartholomew">Myles Bartholomew</option>
         <option value="Paytuna A.">Paytuna A.</option>
-        <option value="Quinn Ham">Quinn Ham</option>
+        <option value="Quin Ham">Quin Ham</option>
         <option value="Ritwika Veeravalli">Ritwika Veeravalli</option>
         <option value="Sebastian Velez">Sebastian Velez</option>
         <option value="Trace Willaims">Trace Willaims</option>
@@ -246,6 +246,7 @@
         <option value="Akshaya Guduru">Akshaya Guduru</option>
         <option value="Anand Kunnath">Anand Kunnath</option>
         <option value="Liam Karlson">Liam Karlson</option>
+        <option value="Bon lee">Bon Lee</option>
       </select>
 
       <button
